@@ -8,22 +8,22 @@
   --card-foreground: oklch(0.13 0.028 261.692);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.13 0.028 261.692);
-  --primary: oklch(0.21 0.034 264.665);
-  --primary-foreground: oklch(0.985 0.002 247.839);
-  --secondary: oklch(0.967 0.003 264.542);
-  --secondary-foreground: oklch(0.21 0.034 264.665);
-  --muted: oklch(0.967 0.003 264.542);
-  --muted-foreground: oklch(0.551 0.027 264.364);
-  --accent: oklch(0.967 0.003 264.542);
-  --accent-foreground: oklch(0.21 0.034 264.665);
+  --primary: oklch(0.45 0.15 245); /* Medical Blue */
+  --primary-foreground: oklch(0.985 0 0); /* White */
+  --secondary: oklch(0.95 0.03 245); /* Very Light Blue */
+  --secondary-foreground: oklch(0.45 0.15 245); /* Medical Blue Text */
+  --muted: oklch(0.96 0.01 245);
+  --muted-foreground: oklch(0.55 0.05 245);
+  --accent: oklch(0.93 0.04 245);
+  --accent-foreground: oklch(0.45 0.15 245);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: #fafafa;
-  --border: oklch(0.928 0.006 264.531);
-  --input: oklch(0.928 0.006 264.531);
-  --ring: oklch(0.707 0.022 261.325);
+  --border: oklch(0.9 0.02 245);
+  --input: oklch(0.9 0.02 245);
+  --ring: oklch(0.45 0.15 245);
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.13 0.028 261.692);
+  --background: oklch(0.99 0.005 245); /* Hint of blue in slightly off-white */
+  --foreground: oklch(0.15 0.05 245); /* Deep Blue-Black */
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
