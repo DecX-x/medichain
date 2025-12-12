@@ -45,10 +45,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <Menu className="w-5 h-5" />
           </Button>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">M</span>
-            </div>
-            <span className="font-semibold">MediChain</span>
+            <span className="font-bold">MediChain</span>
           </div>
         </div>
         <Button variant="ghost" size="icon" aria-label="Notifications">

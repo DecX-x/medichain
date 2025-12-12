@@ -27,7 +27,7 @@ export function Navbar() {
     >
       <div className="flex items-center gap-12 font-sans">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 font-sans font-bold text-xl tracking-tight text-foreground hover:text-primary transition-colors">
+        <Link href="/" className="flex items-center gap-2 font-sans font-bold text-xl tracking-tight text-foreground">
           
           <span>MediChain</span>
         </Link>
