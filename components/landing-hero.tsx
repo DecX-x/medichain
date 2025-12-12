@@ -49,16 +49,16 @@ export function LandingHero() {
           {/* Hero text */}
           <motion.h1
             variants={itemVariants}
-            className="text-4xl md:text-6xl font-bold mb-6 tracking-tight leading-tight"
+            className="text-4xl md:text-6xl font-bold font-sans mb-6 tracking-tight leading-tight text-slate-900"
           >
             Secure Healthcare
            <br />
-            <span className="text-muted-foreground">On The Chain</span>
+            <span className="text-[#06b6d4]">On The Chain</span>
           </motion.h1>
 
           <motion.p
             variants={itemVariants}
-            className="text-lg text-muted-foreground mb-10 max-w-xl mx-auto"
+            className="text-lg text-muted-foreground font-sans mb-10 max-w-xl mx-auto"
           >
             Empowering hospitals with decentralized patient data management. 
             Secure, transparent, and always accessible.
@@ -74,7 +74,7 @@ export function LandingHero() {
                 whileTap={{ scale: 0.95 }}
                 className="w-full sm:w-auto"
               >
-                <InteractiveHoverButton className="relative overflow-hidden w-full sm:w-auto rounded-md">
+                <InteractiveHoverButton className="relative overflow-hidden w-full font-sans sm:w-auto rounded-md py-2">
                   
                   Connect Hospital Node
                 </InteractiveHoverButton>
