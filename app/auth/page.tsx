@@ -189,6 +189,9 @@ function WalletConnection({
               color: "white",
             },
           }}
+          detailsButton={{
+            render: () => <></>
+          }}
         />
 
         {/* Help Link */}
