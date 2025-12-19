@@ -148,14 +148,14 @@ export function LandingHero() {
             animate={{ y: [0, -10, 0] }}
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
           >
-            <Shield className="w-6 h-6 text-primary" />
+            <Shield className="w-10 h-10 text-primary" />
           </motion.div>
           <motion.div 
             className="absolute -bottom-4 -left-4 p-3 rounded-xl bg-white shadow-lg border border-border/50"
             animate={{ y: [0, -10, 0] }}
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1 }}
           >
-            <Database className="w-6 h-6 text-primary" />
+            <Database className="w-10 h-10 text-primary" />
           </motion.div>
         </motion.div>
       </div>

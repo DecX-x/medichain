@@ -4,6 +4,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
 
+
 // NavLink component with soft blue block hover
 function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
@@ -47,9 +48,11 @@ export function Navbar() {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          <Button size="sm" className="font-semibold px-6 shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all duration-300">
+          <Link href="/auth">
+          <Button size="sm" className="font-semibold px-6 shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all duration-300 cursor-pointer">
             Get Started
           </Button>
+          </Link>
         </motion.div>
       </div>
     </motion.nav>
