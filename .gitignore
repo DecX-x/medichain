@@ -5,7 +5,6 @@ cache/
 out/
 docs/
 .env
-.env.*
 *.log
 *.tmp
 .idea/
