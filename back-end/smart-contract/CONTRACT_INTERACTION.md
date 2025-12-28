@@ -1,16 +1,296 @@
 # Medichain Smart Contract Interaction Guide
 
+> **Last Updated:** December 28, 2025  
+> **Tested & Verified:** All commands tested on Lisk Sepolia Testnet ✅
+
 ## Deployed Contracts (Lisk Sepolia Testnet)
 
 | Contract | Address | Block Explorer |
 |----------|---------|----------------|
-| **AutomatedHospitalRegistry** | `0xd694475B5c7D2610dfcBc9F3ea83377A3ac4C5BB` | [View](https://sepolia-blockscout.lisk.com/address/0xd694475B5c7D2610dfcBc9F3ea83377A3ac4C5BB) |
-| **MedichainPatientIdentity** | `0x7568f9E2D79eB7fE4396BC78fbB63303d984901A` | [View](https://sepolia-blockscout.lisk.com/address/0x7568f9E2D79eB7fE4396BC78fbB63303d984901A) |
+| **MedichainPatientIdentity** | `0xd694475B5c7D2610dfcBc9F3ea83377A3ac4C5BB` | [View](https://sepolia-blockscout.lisk.com/address/0xd694475B5c7D2610dfcBc9F3ea83377A3ac4C5BB) |
+| **AutomatedHospitalRegistry** | `0x7568f9E2D79eB7fE4396BC78fbB63303d984901A` | [View](https://sepolia-blockscout.lisk.com/address/0x7568f9E2D79eB7fE4396BC78fbB63303d984901A) |
 
 **Network Details:**
 - **Chain ID:** 4202
 - **RPC URL:** https://rpc.sepolia-api.lisk.com
 - **Block Explorer:** https://sepolia-blockscout.lisk.com
+
+**Test Accounts Used:**
+| Role | Address |
+|------|---------|
+| Admin/Hospital (RS Harapan Kita) | `0x8b9616c56fc48cf040F7204CFD6D67ef34f6CF21` |
+| Patient 1 (Budi) | `0xA06c806a1616577f4ABc2368e6e9dAA9611eDE3B` |
+| Patient 2 (Eka) | `0x89fE14d303EF4C16b6611FdC0561B9A274fd8151` |
+| RS Medistra | `0x09f484232739F451ac5BD79d77c8D2889e412030` |
+
+---
+
+## Quick Start - Environment Setup
+
+```bash
+# Load environment variables
+source .env
+
+# Set contract addresses
+export RPC_URL="https://rpc.sepolia-api.lisk.com"
+export PATIENT_CONTRACT="0xd694475B5c7D2610dfcBc9F3ea83377A3ac4C5BB"
+export HOSPITAL_REGISTRY="0x7568f9E2D79eB7fE4396BC78fbB63303d984901A"
+
+# Get your wallet address from private key
+ADMIN_ADDRESS=$(cast wallet address --private-key $PRIVATE_KEY)
+echo "Admin Address: $ADMIN_ADDRESS"
+```
+
+---
+
+## MedichainPatientIdentity Contract
+
+### Overview
+This contract manages:
+- Patient identity as **Soulbound Token (SBT)** - non-transferable NFT
+- Access control between patients and hospitals
+- Medical records storage (IPFS references + data hashes)
+
+### Roles
+| Role | Description |
+|------|-------------|
+| `DEFAULT_ADMIN_ROLE` | Contract owner, full access |
+| `ADMIN_ROLE` | Can whitelist hospitals |
+| `HOSPITAL_ROLE` | Whitelisted hospitals that can mint identities and add records |
+
+### Access Types (String-based)
+```
+"READ_ONLY"     - View medical records only
+"FULL_ACCESS"   - View + add medical records
+```
+
+---
+
+## 🏥 Hospital Flow
+
+### 1. Whitelist Hospital (Admin Only)
+
+Hospitals must be whitelisted before they can mint patient identities or add records.
+
+```solidity
+function whitelistHospital(address hospital, string memory hospitalName) external
+```
+
+**Cast Command (TESTED ✅):**
+```bash
+cast send $PATIENT_CONTRACT \
+  "whitelistHospital(address,string)" \
+  "0xHOSPITAL_ADDRESS" \
+  "RS Harapan Kita" \
+  --rpc-url $RPC_URL \
+  --private-key $PRIVATE_KEY
+```
+
+**Example (Tested):**
+```bash
+cast send 0xd694475B5c7D2610dfcBc9F3ea83377A3ac4C5BB \
+  "whitelistHospital(address,string)" \
+  0x8b9616c56fc48cf040F7204CFD6D67ef34f6CF21 \
+  "RS Harapan Kita" \
+  --rpc-url https://rpc.sepolia-api.lisk.com \
+  --private-key $PRIVATE_KEY
+```
+
+### 2. Check Hospital Authorization
+
+```solidity
+function isHospitalAuthorized(address hospital) external view returns (bool)
+```
+
+**Cast Command (TESTED ✅):**
+```bash
+cast call $PATIENT_CONTRACT \
+  "isHospitalAuthorized(address)(bool)" \
+  "0xHOSPITAL_ADDRESS" \
+  --rpc-url $RPC_URL
+```
+
+**Example:**
+```bash
+cast call 0xd694475B5c7D2610dfcBc9F3ea83377A3ac4C5BB \
+  "isHospitalAuthorized(address)(bool)" \
+  0x8b9616c56fc48cf040F7204CFD6D67ef34f6CF21 \
+  --rpc-url https://rpc.sepolia-api.lisk.com
+# Output: true
+```
+
+### 3. Mint Patient Identity (Hospital Mints for Patient)
+
+Hospital mints a Soulbound Token for the patient. Patient cannot mint their own identity.
+
+```solidity
+function mintIdentity(address patient) external returns (uint256 tokenId)
+```
+
+**Cast Command (TESTED ✅):**
+```bash
+cast send $PATIENT_CONTRACT \
+  "mintIdentity(address)" \
+  "0xPATIENT_ADDRESS" \
+  --rpc-url $RPC_URL \
+  --private-key $HOSPITAL_PRIVATE_KEY
+```
+
+**Example (Tested):**
+```bash
+cast send 0xd694475B5c7D2610dfcBc9F3ea83377A3ac4C5BB \
+  "mintIdentity(address)" \
+  0x89fE14d303EF4C16b6611FdC0561B9A274fd8151 \
+  --rpc-url https://rpc.sepolia-api.lisk.com \
+  --private-key $PRIVATE_KEY
+```
+
+---
+
+## 👤 Patient Flow
+
+### 1. Check Patient Has Identity
+
+```solidity
+function hasPatientIdentity(address patient) external view returns (bool)
+```
+
+**Cast Command (TESTED ✅):**
+```bash
+cast call $PATIENT_CONTRACT \
+  "hasPatientIdentity(address)(bool)" \
+  "0xPATIENT_ADDRESS" \
+  --rpc-url $RPC_URL
+```
+
+### 2. Get Patient Token ID
+
+```solidity
+function getPatientId(address patient) external view returns (uint256)
+```
+
+**Cast Command (TESTED ✅):**
+```bash
+cast call $PATIENT_CONTRACT \
+  "getPatientId(address)(uint256)" \
+  "0xPATIENT_ADDRESS" \
+  --rpc-url $RPC_URL
+```
+
+### 3. Grant Access to Hospital (Patient Action)
+
+Patient grants access to a whitelisted hospital for a specific duration.
+
+**⚠️ IMPORTANT: Hospital must be whitelisted first, otherwise error `HospitalNotWhitelisted`**
+
+```solidity
+function grantAccess(
+    address accessor,          // Hospital address (must be whitelisted)
+    string memory accessType,  // "READ_ONLY" or "FULL_ACCESS"
+    uint256 expiresAt          // Unix timestamp when access expires
+) external
+```
+
+**Cast Command (TESTED ✅):**
+```bash
+# Calculate expiry (365 days from now)
+EXPIRY=$(date -d "+365 days" +%s)
+
+cast send $PATIENT_CONTRACT \
+  "grantAccess(address,string,uint256)" \
+  "0xHOSPITAL_ADDRESS" \
+  "FULL_ACCESS" \
+  $EXPIRY \
+  --rpc-url $RPC_URL \
+  --private-key $PATIENT_PRIVATE_KEY
+```
+
+**Example (Tested):**
+```bash
+# Grant FULL_ACCESS to RS Harapan Kita for 365 days
+EXPIRY=$(date -d "+365 days" +%s)
+cast send 0xd694475B5c7D2610dfcBc9F3ea83377A3ac4C5BB \
+  "grantAccess(address,string,uint256)" \
+  0x8b9616c56fc48cf040F7204CFD6D67ef34f6CF21 \
+  "FULL_ACCESS" \
+  $EXPIRY \
+  --rpc-url https://rpc.sepolia-api.lisk.com \
+  --private-key $PATIENT_PRIVATE_KEY
+```
+
+```bash
+# Grant READ_ONLY to RS Medistra for 30 days
+EXPIRY=$(date -d "+30 days" +%s)
+cast send 0xd694475B5c7D2610dfcBc9F3ea83377A3ac4C5BB \
+  "grantAccess(address,string,uint256)" \
+  0x09f484232739F451ac5BD79d77c8D2889e412030 \
+  "READ_ONLY" \
+  $EXPIRY \
+  --rpc-url https://rpc.sepolia-api.lisk.com \
+  --private-key $PATIENT_PRIVATE_KEY
+```
+
+---
+
+## 📋 Medical Records Flow
+
+### 1. Add Medical Record (Hospital Only)
+
+Hospital adds medical record for patient (requires having access from patient).
+
+```solidity
+function addMedicalRecord(
+    address patient,           // Patient address
+    string memory ipfsCid,     // IPFS Content ID of encrypted medical data
+    bytes32 dataHash,          // SHA-256 hash of the data for integrity verification
+    string memory icd10Code,   // ICD-10 diagnosis code (e.g., "A91", "D69.6")
+    string memory recordType   // Type of record (e.g., "DIAGNOSIS", "LAB_RESULT")
+) external returns (uint256 recordId)
+```
+
+**Cast Command (TESTED ✅):**
+```bash
+# Create data hash
+DATA_HASH=$(cast keccak "UniqueDataIdentifier_$(date +%s)")
+
+cast send $PATIENT_CONTRACT \
+  "addMedicalRecord(address,string,bytes32,string,string)" \
+  "0xPATIENT_ADDRESS" \
+  "QmIPFSContentID" \
+  $DATA_HASH \
+  "ICD10_CODE" \
+  "RECORD_TYPE" \
+  --rpc-url $RPC_URL \
+  --private-key $HOSPITAL_PRIVATE_KEY
+```
+
+**Example (Tested) - Diagnosis Record:**
+```bash
+DATA_HASH=$(cast keccak "DemamBerdarah_Eka_$(date +%s)")
+cast send 0xd694475B5c7D2610dfcBc9F3ea83377A3ac4C5BB \
+  "addMedicalRecord(address,string,bytes32,string,string)" \
+  0x89fE14d303EF4C16b6611FdC0561B9A274fd8151 \
+  "QmDemamBerdarahRecord_Eka_001" \
+  $DATA_HASH \
+  "A91" \
+  "DIAGNOSIS" \
+  --rpc-url https://rpc.sepolia-api.lisk.com \
+  --private-key $PRIVATE_KEY
+```
+
+**Example (Tested) - Lab Result:**
+```bash
+DATA_HASH=$(cast keccak "LabResult_Eka_$(date +%s)")
+cast send 0xd694475B5c7D2610dfcBc9F3ea83377A3ac4C5BB \
+  "addMedicalRecord(address,string,bytes32,string,string)" \
+  0x89fE14d303EF4C16b6611FdC0561B9A274fd8151 \
+  "QmLabResult_Eka_Trombosit_001" \
+  $DATA_HASH \
+  "D69.6" \
+  "LAB_RESULT" \
+  --rpc-url https://rpc.sepolia-api.lisk.com \
+  --private-key $PRIVATE_KEY
+```
 
 ---
 
@@ -30,42 +310,39 @@ This contract manages hospital registration with government signature verificati
 #### 1. Register Hospital (with Government Signature)
 ```solidity
 function registerHospital(
-    string calldata _name,
-    string calldata _licenseNumber,
-    bytes calldata _signature
+    string calldata name,
+    string calldata licenseNumber,
+    bytes calldata signature
 ) external
 ```
 
 **Cast Command:**
 ```bash
-# First, generate signature from government signer
-# The message to sign is: keccak256(abi.encodePacked(hospitalAddress, licenseNumber))
-
-cast send 0xd694475B5c7D2610dfcBc9F3ea83377A3ac4C5BB \
+cast send $HOSPITAL_REGISTRY \
   "registerHospital(string,string,bytes)" \
-  "RS Harapan Kita" \
+  "RS Central" \
   "LIC-2024-001" \
   "0x<signature_hex>" \
-  --rpc-url https://rpc.sepolia-api.lisk.com \
-  --private-key $PRIVATE_KEY
+  --rpc-url $RPC_URL \
+  --private-key $HOSPITAL_PRIVATE_KEY
 ```
 
 #### 2. Check if Hospital is Registered
 ```solidity
-function isHospitalRegistered(address _hospital) external view returns (bool)
+function isHospitalRegistered(address hospital) external view returns (bool)
 ```
 
 **Cast Command:**
 ```bash
-cast call 0xd694475B5c7D2610dfcBc9F3ea83377A3ac4C5BB \
-  "isHospitalRegistered(address)" \
+cast call $HOSPITAL_REGISTRY \
+  "isHospitalRegistered(address)(bool)" \
   "0xHOSPITAL_ADDRESS" \
-  --rpc-url https://rpc.sepolia-api.lisk.com
+  --rpc-url $RPC_URL
 ```
 
 #### 3. Get Hospital Info
 ```solidity
-function getHospital(address _hospital) external view returns (
+function getHospital(address hospital) external view returns (
     string memory name,
     string memory licenseNumber,
     bool isRegistered,
@@ -75,474 +352,130 @@ function getHospital(address _hospital) external view returns (
 
 **Cast Command:**
 ```bash
-cast call 0xd694475B5c7D2610dfcBc9F3ea83377A3ac4C5BB \
+cast call $HOSPITAL_REGISTRY \
   "getHospital(address)" \
   "0xHOSPITAL_ADDRESS" \
-  --rpc-url https://rpc.sepolia-api.lisk.com
-```
-
-#### 4. Set Government Signer (Admin Only)
-```solidity
-function setGovernmentSigner(address _signer) external onlyRole(DEFAULT_ADMIN_ROLE)
-```
-
-**Cast Command:**
-```bash
-cast send 0xd694475B5c7D2610dfcBc9F3ea83377A3ac4C5BB \
-  "setGovernmentSigner(address)" \
-  "0xNEW_SIGNER_ADDRESS" \
-  --rpc-url https://rpc.sepolia-api.lisk.com \
-  --private-key $ADMIN_PRIVATE_KEY
+  --rpc-url $RPC_URL
 ```
 
 ---
 
-## MedichainPatientIdentity Contract
+## Complete Tested Scenarios
 
-### Overview
-This contract manages patient identity (Soulbound Token), access control, and medical records.
-
-### Roles
-| Role | Description |
-|------|-------------|
-| `DEFAULT_ADMIN_ROLE` | Contract owner, full access |
-| `ADMIN_ROLE` | Can manage hospitals and system settings |
-| `HOSPITAL_ROLE` | Registered hospitals that can add medical records |
-
-### Access Types (Enum)
-```solidity
-enum AccessType {
-    NONE,           // 0 - No access
-    VIEW_BASIC,     // 1 - View basic profile only
-    VIEW_RECORDS,   // 2 - View medical records
-    ADD_RECORDS,    // 3 - Add new medical records
-    FULL_ACCESS     // 4 - Full access (view + add)
-}
-```
-
----
-
-## Patient Flow
-
-### 1. Register Patient (Get Soulbound Token)
-```solidity
-function registerPatient(
-    string calldata _name,
-    string calldata _dateOfBirth,
-    string calldata _gender,
-    string calldata _bloodType,
-    string calldata _encryptedDataHash
-) external returns (uint256 tokenId)
-```
-
-**Cast Command:**
+### Scenario 1: Hospital Onboarding
 ```bash
-cast send 0x7568f9E2D79eB7fE4396BC78fbB63303d984901A \
-  "registerPatient(string,string,string,string,string)" \
-  "John Doe" \
-  "1990-01-15" \
-  "Male" \
-  "O+" \
-  "QmXyz...encrypted_data_hash" \
-  --rpc-url https://rpc.sepolia-api.lisk.com \
-  --private-key $PATIENT_PRIVATE_KEY
+source .env
+export PATIENT_CONTRACT="0xd694475B5c7D2610dfcBc9F3ea83377A3ac4C5BB"
+export RPC_URL="https://rpc.sepolia-api.lisk.com"
+
+# 1. Admin whitelist hospital
+cast send $PATIENT_CONTRACT "whitelistHospital(address,string)" \
+  $HOSPITAL_ADDRESS "RS Harapan Kita" \
+  --rpc-url $RPC_URL --private-key $PRIVATE_KEY
+
+# 2. Verify hospital is authorized
+cast call $PATIENT_CONTRACT "isHospitalAuthorized(address)(bool)" \
+  $HOSPITAL_ADDRESS --rpc-url $RPC_URL
+# Output: true
 ```
 
-### 2. Get Patient Profile
-```solidity
-function getPatientProfile(address _patient) external view returns (
-    string memory name,
-    string memory dateOfBirth,
-    string memory gender,
-    string memory bloodType,
-    uint256 tokenId,
-    uint256 registeredAt,
-    bool isActive
-)
-```
-
-**Cast Command:**
+### Scenario 2: New Patient Registration
 ```bash
-cast call 0x7568f9E2D79eB7fE4396BC78fbB63303d984901A \
-  "getPatientProfile(address)" \
-  "0xPATIENT_ADDRESS" \
-  --rpc-url https://rpc.sepolia-api.lisk.com
+# 1. Hospital mints identity for patient
+cast send $PATIENT_CONTRACT "mintIdentity(address)" \
+  $PATIENT_ADDRESS \
+  --rpc-url $RPC_URL --private-key $HOSPITAL_PRIVATE_KEY
+
+# 2. Verify patient has identity
+cast call $PATIENT_CONTRACT "hasPatientIdentity(address)(bool)" \
+  $PATIENT_ADDRESS --rpc-url $RPC_URL
+# Output: true
+
+# 3. Get patient token ID
+cast call $PATIENT_CONTRACT "getPatientId(address)(uint256)" \
+  $PATIENT_ADDRESS --rpc-url $RPC_URL
+# Output: 4
 ```
 
-### 3. Update Patient Profile
-```solidity
-function updatePatientProfile(
-    string calldata _name,
-    string calldata _bloodType,
-    string calldata _encryptedDataHash
-) external onlyRegisteredPatient
-```
-
-**Cast Command:**
+### Scenario 3: Grant Access & Add Records
 ```bash
-cast send 0x7568f9E2D79eB7fE4396BC78fbB63303d984901A \
-  "updatePatientProfile(string,string,string)" \
-  "John Doe Updated" \
-  "AB+" \
-  "QmNewHash..." \
-  --rpc-url https://rpc.sepolia-api.lisk.com \
-  --private-key $PATIENT_PRIVATE_KEY
-```
+# 1. Patient grants FULL_ACCESS to hospital (365 days)
+EXPIRY=$(date -d "+365 days" +%s)
+cast send $PATIENT_CONTRACT "grantAccess(address,string,uint256)" \
+  $HOSPITAL_ADDRESS "FULL_ACCESS" $EXPIRY \
+  --rpc-url $RPC_URL --private-key $PATIENT_PRIVATE_KEY
 
----
-
-## Access Control Flow
-
-### 1. Grant Access to Hospital/Doctor
-```solidity
-function grantAccess(
-    address _accessor,
-    AccessType _accessType,
-    uint256 _expiresAt
-) external onlyRegisteredPatient
-```
-
-**Cast Command:**
-```bash
-# Grant VIEW_RECORDS access for 30 days
-cast send 0x7568f9E2D79eB7fE4396BC78fbB63303d984901A \
-  "grantAccess(address,uint8,uint256)" \
-  "0xHOSPITAL_ADDRESS" \
-  2 \
-  $(date -d "+30 days" +%s) \
-  --rpc-url https://rpc.sepolia-api.lisk.com \
-  --private-key $PATIENT_PRIVATE_KEY
-```
-
-### 2. Grant Access with Signature (Gasless for Patient)
-```solidity
-function grantAccessWithSignature(
-    address _patient,
-    address _accessor,
-    AccessType _accessType,
-    uint256 _expiresAt,
-    uint256 _nonce,
-    bytes calldata _signature
-) external
-```
-
-**JavaScript Example:**
-```javascript
-const ethers = require('ethers');
-
-async function grantAccessWithSignature() {
-    const patient = new ethers.Wallet(PATIENT_PRIVATE_KEY);
-    const accessor = "0xHOSPITAL_ADDRESS";
-    const accessType = 2; // VIEW_RECORDS
-    const expiresAt = Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60); // 30 days
-    const nonce = await contract.getPatientNonce(patient.address);
-    
-    // Create message hash
-    const messageHash = ethers.solidityPackedKeccak256(
-        ["address", "address", "uint8", "uint256", "uint256"],
-        [patient.address, accessor, accessType, expiresAt, nonce]
-    );
-    
-    // Sign the message
-    const signature = await patient.signMessage(ethers.getBytes(messageHash));
-    
-    // Anyone can submit this transaction
-    await contract.grantAccessWithSignature(
-        patient.address,
-        accessor,
-        accessType,
-        expiresAt,
-        nonce,
-        signature
-    );
-}
-```
-
-### 3. Check Access Permission
-```solidity
-function hasAccess(
-    address _patient,
-    address _accessor,
-    AccessType _requiredAccess
-) external view returns (bool)
-```
-
-**Cast Command:**
-```bash
-cast call 0x7568f9E2D79eB7fE4396BC78fbB63303d984901A \
-  "hasAccess(address,address,uint8)" \
-  "0xPATIENT_ADDRESS" \
-  "0xHOSPITAL_ADDRESS" \
-  2 \
-  --rpc-url https://rpc.sepolia-api.lisk.com
-```
-
-### 4. Get Access Details
-```solidity
-function getAccessPermission(
-    address _patient,
-    address _accessor
-) external view returns (
-    AccessType accessType,
-    uint256 grantedAt,
-    uint256 expiresAt,
-    bool isActive
-)
-```
-
-**Cast Command:**
-```bash
-cast call 0x7568f9E2D79eB7fE4396BC78fbB63303d984901A \
-  "getAccessPermission(address,address)" \
-  "0xPATIENT_ADDRESS" \
-  "0xHOSPITAL_ADDRESS" \
-  --rpc-url https://rpc.sepolia-api.lisk.com
-```
-
-### 5. Revoke Access
-```solidity
-function revokeAccess(address _accessor) external onlyRegisteredPatient
-```
-
-**Cast Command:**
-```bash
-cast send 0x7568f9E2D79eB7fE4396BC78fbB63303d984901A \
-  "revokeAccess(address)" \
-  "0xHOSPITAL_ADDRESS" \
-  --rpc-url https://rpc.sepolia-api.lisk.com \
-  --private-key $PATIENT_PRIVATE_KEY
-```
-
-### 6. Get All Accessors for Patient
-```solidity
-function getPatientAccessors(address _patient) external view returns (address[] memory)
-```
-
-**Cast Command:**
-```bash
-cast call 0x7568f9E2D79eB7fE4396BC78fbB63303d984901A \
-  "getPatientAccessors(address)" \
-  "0xPATIENT_ADDRESS" \
-  --rpc-url https://rpc.sepolia-api.lisk.com
-```
-
----
-
-## Medical Records Flow
-
-### 1. Add Medical Record (Hospital Only)
-```solidity
-function addMedicalRecord(
-    address _patient,
-    string calldata _recordType,
-    string calldata _ipfsHash,
-    string calldata _encryptedKey
-) external returns (uint256 recordId)
-```
-
-**Cast Command:**
-```bash
-cast send 0x7568f9E2D79eB7fE4396BC78fbB63303d984901A \
-  "addMedicalRecord(address,string,string,string)" \
-  "0xPATIENT_ADDRESS" \
-  "Lab Result" \
-  "QmXyz...ipfs_hash" \
-  "encrypted_key_base64" \
-  --rpc-url https://rpc.sepolia-api.lisk.com \
-  --private-key $HOSPITAL_PRIVATE_KEY
-```
-
-### 2. Get Medical Record
-```solidity
-function getMedicalRecord(
-    address _patient,
-    uint256 _recordId
-) external view returns (
-    uint256 id,
-    string memory recordType,
-    address hospital,
-    uint256 timestamp,
-    string memory ipfsHash,
-    bool isActive
-)
-```
-
-**Cast Command:**
-```bash
-cast call 0x7568f9E2D79eB7fE4396BC78fbB63303d984901A \
-  "getMedicalRecord(address,uint256)" \
-  "0xPATIENT_ADDRESS" \
-  1 \
-  --rpc-url https://rpc.sepolia-api.lisk.com
-```
-
-### 3. Get Patient Record Count
-```solidity
-function getPatientRecordCount(address _patient) external view returns (uint256)
-```
-
-**Cast Command:**
-```bash
-cast call 0x7568f9E2D79eB7fE4396BC78fbB63303d984901A \
-  "getPatientRecordCount(address)" \
-  "0xPATIENT_ADDRESS" \
-  --rpc-url https://rpc.sepolia-api.lisk.com
-```
-
-### 4. Get Encrypted Key (Requires Access)
-```solidity
-function getRecordEncryptedKey(
-    address _patient,
-    uint256 _recordId
-) external view returns (string memory)
-```
-
-**Cast Command:**
-```bash
-cast call 0x7568f9E2D79eB7fE4396BC78fbB63303d984901A \
-  "getRecordEncryptedKey(address,uint256)" \
-  "0xPATIENT_ADDRESS" \
-  1 \
-  --rpc-url https://rpc.sepolia-api.lisk.com \
-  --from 0xAUTHORIZED_ADDRESS
-```
-
-### 5. Deactivate Record (Patient Only)
-```solidity
-function deactivateRecord(uint256 _recordId) external onlyRegisteredPatient
-```
-
-**Cast Command:**
-```bash
-cast send 0x7568f9E2D79eB7fE4396BC78fbB63303d984901A \
-  "deactivateRecord(uint256)" \
-  1 \
-  --rpc-url https://rpc.sepolia-api.lisk.com \
-  --private-key $PATIENT_PRIVATE_KEY
-```
-
----
-
-## Hospital Management (Admin Only)
-
-### 1. Whitelist Hospital in Patient Contract
-```solidity
-function whitelistHospital(address _hospital) external onlyRole(ADMIN_ROLE)
-```
-
-**Cast Command:**
-```bash
-cast send 0x7568f9E2D79eB7fE4396BC78fbB63303d984901A \
-  "whitelistHospital(address)" \
-  "0xHOSPITAL_ADDRESS" \
-  --rpc-url https://rpc.sepolia-api.lisk.com \
-  --private-key $ADMIN_PRIVATE_KEY
-```
-
-### 2. Remove Hospital from Whitelist
-```solidity
-function removeHospitalFromWhitelist(address _hospital) external onlyRole(ADMIN_ROLE)
-```
-
-**Cast Command:**
-```bash
-cast send 0x7568f9E2D79eB7fE4396BC78fbB63303d984901A \
-  "removeHospitalFromWhitelist(address)" \
-  "0xHOSPITAL_ADDRESS" \
-  --rpc-url https://rpc.sepolia-api.lisk.com \
-  --private-key $ADMIN_PRIVATE_KEY
-```
-
-### 3. Check Hospital Authorization
-```solidity
-function isHospitalAuthorized(address _hospital) external view returns (bool)
-```
-
-**Cast Command:**
-```bash
-cast call 0x7568f9E2D79eB7fE4396BC78fbB63303d984901A \
-  "isHospitalAuthorized(address)" \
-  "0xHOSPITAL_ADDRESS" \
-  --rpc-url https://rpc.sepolia-api.lisk.com
-```
-
----
-
-## Complete Flow Examples
-
-### Flow 1: Patient Registration & Profile Setup
-
-```bash
-# 1. Patient registers and gets SBT
-cast send 0x7568f9E2D79eB7fE4396BC78fbB63303d984901A \
-  "registerPatient(string,string,string,string,string)" \
-  "Alice Smith" "1995-05-20" "Female" "A+" "QmEncryptedHash123" \
-  --rpc-url https://rpc.sepolia-api.lisk.com \
-  --private-key $PATIENT_PRIVATE_KEY
-
-# 2. Check patient profile
-cast call 0x7568f9E2D79eB7fE4396BC78fbB63303d984901A \
-  "getPatientProfile(address)" $PATIENT_ADDRESS \
-  --rpc-url https://rpc.sepolia-api.lisk.com
-
-# 3. Get patient's token ID
-cast call 0x7568f9E2D79eB7fE4396BC78fbB63303d984901A \
-  "getPatientTokenId(address)" $PATIENT_ADDRESS \
-  --rpc-url https://rpc.sepolia-api.lisk.com
-```
-
-### Flow 2: Hospital Registration & Verification
-
-```bash
-# 1. Admin sets government signer
-cast send 0xd694475B5c7D2610dfcBc9F3ea83377A3ac4C5BB \
-  "setGovernmentSigner(address)" $GOV_SIGNER_ADDRESS \
-  --rpc-url https://rpc.sepolia-api.lisk.com \
-  --private-key $ADMIN_PRIVATE_KEY
-
-# 2. Generate signature (off-chain by government)
-# Message: keccak256(hospitalAddress + licenseNumber)
-
-# 3. Hospital registers with signature
-cast send 0xd694475B5c7D2610dfcBc9F3ea83377A3ac4C5BB \
-  "registerHospital(string,string,bytes)" \
-  "RS Central" "LIC-2024-001" "0xSIGNATURE" \
-  --rpc-url https://rpc.sepolia-api.lisk.com \
-  --private-key $HOSPITAL_PRIVATE_KEY
-
-# 4. Verify hospital is registered
-cast call 0xd694475B5c7D2610dfcBc9F3ea83377A3ac4C5BB \
-  "isHospitalRegistered(address)" $HOSPITAL_ADDRESS \
-  --rpc-url https://rpc.sepolia-api.lisk.com
-```
-
-### Flow 3: Granting Access & Adding Records
-
-```bash
-# 1. Patient grants access to hospital
-cast send 0x7568f9E2D79eB7fE4396BC78fbB63303d984901A \
-  "grantAccess(address,uint8,uint256)" \
-  $HOSPITAL_ADDRESS 3 $(date -d "+30 days" +%s) \
-  --rpc-url https://rpc.sepolia-api.lisk.com \
-  --private-key $PATIENT_PRIVATE_KEY
+# Wait for blockchain to process
+sleep 3
 
 # 2. Hospital adds medical record
-cast send 0x7568f9E2D79eB7fE4396BC78fbB63303d984901A \
-  "addMedicalRecord(address,string,string,string)" \
-  $PATIENT_ADDRESS "Blood Test" "QmIpfsHash123" "encryptedKey123" \
-  --rpc-url https://rpc.sepolia-api.lisk.com \
-  --private-key $HOSPITAL_PRIVATE_KEY
-
-# 3. Check records count
-cast call 0x7568f9E2D79eB7fE4396BC78fbB63303d984901A \
-  "getPatientRecordCount(address)" $PATIENT_ADDRESS \
-  --rpc-url https://rpc.sepolia-api.lisk.com
-
-# 4. Get record details
-cast call 0x7568f9E2D79eB7fE4396BC78fbB63303d984901A \
-  "getMedicalRecord(address,uint256)" $PATIENT_ADDRESS 1 \
-  --rpc-url https://rpc.sepolia-api.lisk.com
+DATA_HASH=$(cast keccak "DiagnosisRecord_$(date +%s)")
+cast send $PATIENT_CONTRACT "addMedicalRecord(address,string,bytes32,string,string)" \
+  $PATIENT_ADDRESS "QmIPFSHash001" $DATA_HASH "A91" "DIAGNOSIS" \
+  --rpc-url $RPC_URL --private-key $HOSPITAL_PRIVATE_KEY
 ```
+
+### Scenario 4: Data Sharing with New Hospital
+```bash
+# ⚠️ IMPORTANT: Admin must whitelist the new hospital FIRST!
+
+# 1. Admin whitelist new hospital
+cast send $PATIENT_CONTRACT "whitelistHospital(address,string)" \
+  $NEW_HOSPITAL_ADDRESS "RS Medistra" \
+  --rpc-url $RPC_URL --private-key $ADMIN_PRIVATE_KEY
+
+sleep 3
+
+# 2. Patient grants READ_ONLY access (30 days)
+EXPIRY=$(date -d "+30 days" +%s)
+cast send $PATIENT_CONTRACT "grantAccess(address,string,uint256)" \
+  $NEW_HOSPITAL_ADDRESS "READ_ONLY" $EXPIRY \
+  --rpc-url $RPC_URL --private-key $PATIENT_PRIVATE_KEY
+```
+
+---
+
+## Common Errors & Solutions
+
+### Error: `HospitalNotWhitelisted`
+```
+Error: Failed to estimate gas: execution reverted, data: "0x409622d3"
+```
+**Cause:** Trying to grant access to a hospital that is not whitelisted.  
+**Solution:** Admin must whitelist the hospital first:
+```bash
+cast send $PATIENT_CONTRACT "whitelistHospital(address,string)" \
+  $HOSPITAL_ADDRESS "Hospital Name" \
+  --rpc-url $RPC_URL --private-key $ADMIN_PRIVATE_KEY
+```
+
+### Error: `PatientNotRegistered`
+**Cause:** Patient doesn't have an identity token.  
+**Solution:** Hospital must mint identity for patient:
+```bash
+cast send $PATIENT_CONTRACT "mintIdentity(address)" \
+  $PATIENT_ADDRESS \
+  --rpc-url $RPC_URL --private-key $HOSPITAL_PRIVATE_KEY
+```
+
+### Error: `nonce too low`
+**Cause:** Transactions sent too quickly, blockchain hasn't updated nonce.  
+**Solution:** Add delay between transactions:
+```bash
+cast send ... --rpc-url $RPC_URL --private-key $KEY
+sleep 3  # Wait 3 seconds before next transaction
+cast send ...
+```
+
+### Error: `execution reverted` (generic)
+**Cause:** Function called with wrong parameters or wrong signature.  
+**Solution:** Verify function signature matches exactly. Common mistakes:
+- ❌ `grantAccess(address,uint8,uint256)` 
+- ✅ `grantAccess(address,string,uint256)` - uses STRING for accessType!
+- ❌ `whitelistHospital(address)` 
+- ✅ `whitelistHospital(address,string)` - requires hospital name!
+- ❌ `addMedicalRecord(address,string,string,string)` 
+- ✅ `addMedicalRecord(address,string,bytes32,string,string)` - 5 params!
 
 ---
 
@@ -555,91 +488,77 @@ const { ethers } = require('ethers');
 const provider = new ethers.JsonRpcProvider('https://rpc.sepolia-api.lisk.com');
 const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
 
-// Contract ABIs (get from artifacts after compile)
-const PATIENT_ADDRESS = '0x7568f9E2D79eB7fE4396BC78fbB63303d984901A';
-const HOSPITAL_REGISTRY_ADDRESS = '0xd694475B5c7D2610dfcBc9F3ea83377A3ac4C5BB';
+const PATIENT_CONTRACT = '0xd694475B5c7D2610dfcBc9F3ea83377A3ac4C5BB';
+const HOSPITAL_REGISTRY = '0x7568f9E2D79eB7fE4396BC78fbB63303d984901A';
 
-// Load ABIs
+// Load ABIs from compiled artifacts
 const patientABI = require('./out/MedichainPatientIdentity.sol/MedichainPatientIdentity.json').abi;
-const hospitalABI = require('./out/AutomatedHospitalRegistry.sol/AutomatedHospitalRegistry.json').abi;
-
-const patientContract = new ethers.Contract(PATIENT_ADDRESS, patientABI, wallet);
-const hospitalContract = new ethers.Contract(HOSPITAL_REGISTRY_ADDRESS, hospitalABI, wallet);
+const patientContract = new ethers.Contract(PATIENT_CONTRACT, patientABI, wallet);
 ```
 
-### Register Patient
+### Whitelist Hospital
 ```javascript
-async function registerPatient() {
-    const tx = await patientContract.registerPatient(
-        "John Doe",
-        "1990-01-15",
-        "Male",
-        "O+",
-        "QmEncryptedDataHash"
-    );
+async function whitelistHospital(hospitalAddress, hospitalName) {
+    const tx = await patientContract.whitelistHospital(hospitalAddress, hospitalName);
+    await tx.wait();
+    console.log('Hospital whitelisted:', hospitalName);
+}
+```
+
+### Mint Identity
+```javascript
+async function mintIdentity(patientAddress) {
+    const tx = await patientContract.mintIdentity(patientAddress);
     const receipt = await tx.wait();
-    console.log('Patient registered, Token ID:', receipt.logs[0].args.tokenId);
+    console.log('Identity minted, Tx:', receipt.hash);
 }
 ```
 
 ### Grant Access
 ```javascript
-async function grantAccessToHospital(hospitalAddress, days = 30) {
+async function grantAccess(hospitalAddress, accessType, days) {
     const expiresAt = Math.floor(Date.now() / 1000) + (days * 24 * 60 * 60);
-    const tx = await patientContract.grantAccess(
-        hospitalAddress,
-        3, // ADD_RECORDS
-        expiresAt
-    );
+    const tx = await patientContract.grantAccess(hospitalAddress, accessType, expiresAt);
     await tx.wait();
-    console.log('Access granted to hospital');
+    console.log('Access granted');
 }
+
+// Usage
+await grantAccess('0x...', 'FULL_ACCESS', 365);
+await grantAccess('0x...', 'READ_ONLY', 30);
 ```
 
-### Add Medical Record (Hospital)
+### Add Medical Record
 ```javascript
-async function addMedicalRecord(patientAddress, recordType, ipfsHash, encryptedKey) {
+async function addMedicalRecord(patientAddress, ipfsCid, icd10Code, recordType) {
+    const dataHash = ethers.keccak256(ethers.toUtf8Bytes(`${recordType}_${Date.now()}`));
     const tx = await patientContract.addMedicalRecord(
         patientAddress,
-        recordType,
-        ipfsHash,
-        encryptedKey
+        ipfsCid,
+        dataHash,
+        icd10Code,
+        recordType
     );
-    const receipt = await tx.wait();
-    console.log('Record added, ID:', receipt.logs[0].args.recordId);
+    await tx.wait();
+    console.log('Record added');
 }
-```
 
-### Check Access
-```javascript
-async function checkAccess(patientAddress, accessorAddress) {
-    const [accessType, grantedAt, expiresAt, isActive] = 
-        await patientContract.getAccessPermission(patientAddress, accessorAddress);
-    
-    console.log({
-        accessType: ['NONE', 'VIEW_BASIC', 'VIEW_RECORDS', 'ADD_RECORDS', 'FULL_ACCESS'][accessType],
-        grantedAt: new Date(Number(grantedAt) * 1000),
-        expiresAt: new Date(Number(expiresAt) * 1000),
-        isActive
-    });
-}
+// Usage
+await addMedicalRecord('0x...', 'QmIPFS123', 'A91', 'DIAGNOSIS');
+await addMedicalRecord('0x...', 'QmIPFS456', 'D69.6', 'LAB_RESULT');
 ```
 
 ---
 
-## 📡 Events to Listen
+## Events
 
 ### MedichainPatientIdentity Events
 ```solidity
-event PatientRegistered(address indexed patient, uint256 tokenId, uint256 timestamp);
-event PatientProfileUpdated(address indexed patient, uint256 timestamp);
-event AccessGranted(address indexed patient, address indexed accessor, AccessType accessType, uint256 expiresAt);
+event IdentityMinted(address indexed patient, uint256 indexed tokenId, uint256 timestamp);
+event AccessGranted(address indexed patient, address indexed accessor, string accessType, uint256 expiresAt);
 event AccessRevoked(address indexed patient, address indexed accessor);
-event MedicalRecordAdded(address indexed patient, uint256 recordId, address indexed hospital, string recordType);
-event MedicalRecordDeactivated(address indexed patient, uint256 recordId);
-event HospitalWhitelisted(address indexed hospital);
-event HospitalRemovedFromWhitelist(address indexed hospital);
-event EmergencyAccessGranted(address indexed patient, address indexed accessor, uint256 expiresAt);
+event MedicalRecordAdded(address indexed patient, address indexed hospital, string ipfsCid, string icd10Code);
+event HospitalWhitelisted(address indexed hospital, string name);
 ```
 
 ### AutomatedHospitalRegistry Events
@@ -650,19 +569,19 @@ event GovernmentSignerUpdated(address indexed oldSigner, address indexed newSign
 
 ### Listen to Events (JavaScript)
 ```javascript
-// Listen for new patient registrations
-patientContract.on('PatientRegistered', (patient, tokenId, timestamp) => {
+// Listen for new identity mints
+patientContract.on('IdentityMinted', (patient, tokenId, timestamp) => {
     console.log(`New patient registered: ${patient}, Token: ${tokenId}`);
 });
 
 // Listen for access grants
 patientContract.on('AccessGranted', (patient, accessor, accessType, expiresAt) => {
-    console.log(`Access granted: ${accessor} can access ${patient}'s records`);
+    console.log(`${accessor} granted ${accessType} access to ${patient}'s records`);
 });
 
 // Listen for new medical records
-patientContract.on('MedicalRecordAdded', (patient, recordId, hospital, recordType) => {
-    console.log(`New record for ${patient}: ${recordType} by ${hospital}`);
+patientContract.on('MedicalRecordAdded', (patient, hospital, ipfsCid, icd10Code) => {
+    console.log(`New record for ${patient}: ${icd10Code} by ${hospital}`);
 });
 ```
 
@@ -670,10 +589,10 @@ patientContract.on('MedicalRecordAdded', (patient, recordId, hospital, recordTyp
 
 ## Security Considerations
 
-1. **Soulbound Token (SBT)**: Patient tokens cannot be transferred
-2. **Access Expiration**: All access permissions have expiry timestamps
-3. **Hospital Verification**: Hospitals must be registered via government signature OR whitelisted in patient contract
-4. **Signature Verification**: Meta-transactions use ECDSA signature verification
+1. **Soulbound Token (SBT)**: Patient tokens cannot be transferred - bound to patient address
+2. **Hospital-Minted Identity**: Only whitelisted hospitals can mint patient identities
+3. **Access Expiration**: All access permissions have expiry timestamps
+4. **Whitelist Requirement**: Hospitals must be whitelisted before patients can grant them access
 5. **Reentrancy Protection**: Critical functions are protected with `nonReentrant` modifier
 6. **Role-Based Access**: OpenZeppelin AccessControl for admin functions
 
@@ -683,31 +602,42 @@ patientContract.on('MedicalRecordAdded', (patient, recordId, hospital, recordTyp
 
 - **Block Explorer:** https://sepolia-blockscout.lisk.com
 - **Lisk Sepolia Faucet:** https://faucet.sepolia-api.lisk.com
-- **Contract Source:** Verified on block explorer (if verified)
+- **Patient Contract:** https://sepolia-blockscout.lisk.com/address/0xd694475B5c7D2610dfcBc9F3ea83377A3ac4C5BB
+- **Hospital Registry:** https://sepolia-blockscout.lisk.com/address/0x7568f9E2D79eB7fE4396BC78fbB63303d984901A
 
 ---
 
-## Useful Cast Commands Reference
+## Full Demo Script
+
+Run the complete interaction demo:
+```bash
+cd /workspaces/health-record-dapps/back-end/smart-contract
+./script/interaction_demo.sh
+```
+
+This script demonstrates:
+1. ✅ Hospital whitelist
+2. ✅ Patient identity minting (SBT)
+3. ✅ Patient granting access to hospital
+4. ✅ Hospital adding medical records
+5. ✅ Patient sharing data with new hospital
+6. ✅ Final verification
+
+---
+
+## Environment Variables Reference
 
 ```bash
-# Set environment variables
-export RPC_URL="https://rpc.sepolia-api.lisk.com"
-export PATIENT_CONTRACT="0x7568f9E2D79eB7fE4396BC78fbB63303d984901A"
-export HOSPITAL_REGISTRY="0xd694475B5c7D2610dfcBc9F3ea83377A3ac4C5BB"
+# .env file
+PRIVATE_KEY=0x...       # Admin/Hospital wallet
+PRIVATE_KEY2=0x...      # Patient 1 (Budi)
+PRIVATE_KEY3=0x...      # RS Medistra
+PRIVATE_KEY4=0x...      # Patient 3
+PRIVATE_KEY5=0x...      # Patient 4 (Eka)
+RPC_URL=https://rpc.sepolia-api.lisk.com
+CHAIN_ID=4202
 
-# Check contract owner
-cast call $PATIENT_CONTRACT "hasRole(bytes32,address)" \
-  $(cast keccak "DEFAULT_ADMIN_ROLE") $YOUR_ADDRESS \
-  --rpc-url $RPC_URL
-
-# Get total patients registered
-cast call $PATIENT_CONTRACT "getTotalPatients()" --rpc-url $RPC_URL
-
-# Get patient nonce (for meta-transactions)
-cast call $PATIENT_CONTRACT "getPatientNonce(address)" $PATIENT_ADDRESS --rpc-url $RPC_URL
-
-# Verify signature
-cast call $PATIENT_CONTRACT "verifyPatientSignature(address,bytes32,bytes)" \
-  $PATIENT_ADDRESS $MESSAGE_HASH $SIGNATURE \
-  --rpc-url $RPC_URL
+# Contract addresses
+PATIENT_CONTRACT=0xd694475B5c7D2610dfcBc9F3ea83377A3ac4C5BB
+HOSPITAL_REGISTRY=0x7568f9E2D79eB7fE4396BC78fbB63303d984901A
 ```
