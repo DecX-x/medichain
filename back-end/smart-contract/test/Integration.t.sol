@@ -16,7 +16,7 @@ contract IntegrationTest is Test {
 
     // Accounts
     address public admin;
-    uint256 internal systemVerifierPrivateKey = 0x5Y5123;
+    uint256 internal systemVerifierPrivateKey = 0x515123;
     address public systemVerifier;
     address public hospital1;
     address public patient1;
@@ -33,7 +33,7 @@ contract IntegrationTest is Test {
         admin = address(this);
         systemVerifier = vm.addr(systemVerifierPrivateKey);
         hospital1 = vm.addr(0x40571);
-        patient1 = vm.addr(0xPA71);
+        patient1 = vm.addr(0xA71);
 
         // 1. Deploy HospitalRegistry first
         hospitalRegistry = new AutomatedHospitalRegistry(systemVerifier);

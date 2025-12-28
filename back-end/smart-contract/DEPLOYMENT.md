@@ -22,7 +22,7 @@
 
 ---
 
-## 📋 Step-by-Step Deployment
+## Step-by-Step Deployment
 
 ### 1. Run Tests First!
 ```bash
@@ -42,7 +42,7 @@ cp .env.example .env
 nano .env
 ```
 
-**⚠️ PENTING: Cara mendapatkan Private Key dari MetaMask:**
+** PENTING: Cara mendapatkan Private Key dari MetaMask:**
 1. Buka MetaMask
 2. Klik 3 titik di samping akun Anda
 3. Pilih "Account Details"
@@ -96,7 +96,7 @@ forge verify-contract \
 
 ---
 
-## 🏥 Post-Deployment: Whitelist Hospital
+## Post-Deployment: Whitelist Hospital
 
 Setelah deploy, Anda perlu whitelist rumah sakit agar bisa menambah pasien dan rekam medis:
 
@@ -114,7 +114,7 @@ forge script script/WhitelistHospital.s.sol:WhitelistHospital \
 
 ---
 
-## 📝 Update Backend Configuration
+## Update Backend Configuration
 
 Setelah deployment berhasil, update file `.env` di backend server:
 
@@ -129,14 +129,14 @@ JWT_SECRET=your_jwt_secret
 
 ---
 
-## 🔍 Verify Deployment
+## Verify Deployment
 
 Cek contract di Block Explorer:
 - https://sepolia-blockscout.lisk.com/address/YOUR_CONTRACT_ADDRESS
 
 ---
 
-## 📊 Contract Architecture
+## Contract Architecture
 
 ```
 ┌─────────────────────────────────┐
@@ -161,7 +161,7 @@ Cek contract di Block Explorer:
 
 ---
 
-## 🛡️ Security Notes
+## Security Notes
 
 1. **JANGAN PERNAH** commit file `.env` ke git
 2. Gunakan wallet khusus untuk deployment, bukan wallet utama
@@ -170,7 +170,7 @@ Cek contract di Block Explorer:
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Error: Insufficient funds
 - Pastikan wallet ada ETH testnet
