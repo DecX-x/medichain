@@ -68,7 +68,9 @@ export default function SettingsPage() {
     setIsSaving(true)
     setSaveSuccess(false)
     
-    // Create updated patient data object
+    // Get existing data to preserve linkedAddresses
+    const existingData = getPatientData(account.address)
+    
     // Create updated patient data object
     const updatedData: PatientData = {
       name: formData.name || "",
@@ -76,8 +78,9 @@ export default function SettingsPage() {
       bloodType: formData.bloodType || "",
       gender: formData.gender || "",
       age: Number(formData.age) || 0,
-      walletAddress: account.address,
-      registeredAt: new Date().toISOString()
+      walletAddress: existingData?.walletAddress || account.address,
+      linkedAddresses: existingData?.linkedAddresses || [], // Preserve linked addresses
+      registeredAt: existingData?.registeredAt || new Date().toISOString()
     }
 
     // Save actual data

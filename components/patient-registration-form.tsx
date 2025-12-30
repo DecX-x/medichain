@@ -62,6 +62,7 @@ export function PatientRegistrationForm({ walletAddress, onComplete }: PatientRe
         gender: value.gender as any,
         age: Number(value.age),
         walletAddress: walletAddress,
+        linkedAddresses: [], // Initialize empty linked addresses
         registeredAt: new Date().toISOString(),
       }
       

@@ -9,7 +9,7 @@ import { client, wallets } from "@/lib/thirdWeb"
 import { useRouter } from "next/navigation"
 import { PatientRegistrationForm } from "@/components/patient-registration-form"
 import { PatientQRCode } from "@/components/patient-qr-code"
-import { getPatientData, savePatientData, PatientData, clearAllAppData, getBiometricEnabled, setBiometricEnabled as saveBiometricEnabled } from "@/lib/patientStorage"
+import { getPatientData, savePatientData, PatientData, clearAllAppData, getBiometricEnabled, setBiometricEnabled as saveBiometricEnabled, linkWalletToPatient } from "@/lib/patientStorage"
 import { useBiometricAuth } from "@/hooks/use-biometric-auth"
 import { 
   User, 
@@ -65,20 +65,15 @@ export default function PatientDashboard() {
         const newAccount = newWallet.getAccount();
         const newAddress = newAccount?.address;
 
-        // If we have a new address and existing data, migrate it
-        if (newAddress && newAddress !== currentAddress && currentData) {
-            console.log("Migrating data from", currentAddress, "to", newAddress);
+        // If we have existing data, link the new wallet to it
+        if (newAddress && currentData) {
+            console.log("Linking new wallet", newAddress, "to existing patient");
             
-            const migratedData = { 
-                ...currentData, 
-                walletAddress: newAddress 
-            };
+            // Use the new linking function
+            const updatedData = linkWalletToPatient(currentData, newAddress);
             
-            // Save to storage for the new address
-            savePatientData(migratedData);
-            
-            // Update local state immediately so UI doesn't flash registration form
-            setPatientData(migratedData);
+            // Update local state immediately
+            setPatientData(updatedData);
         }
         
         setBiometricEnabled(true)
