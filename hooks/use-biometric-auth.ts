@@ -1,5 +1,5 @@
 import { useConnect } from "thirdweb/react";
-import { inAppWallet } from "thirdweb/wallets";
+import { inAppWallet, Wallet } from "thirdweb/wallets";
 import { client, liskSepolia } from "@/lib/thirdWeb";
 
 export function useBiometricAuth() {
@@ -25,22 +25,24 @@ export function useBiometricAuth() {
   };
 
   // Explicitly for creating a new passkey credential (registration)
-  const registerBiometric = async () => {
+  const registerBiometric = async (): Promise<Wallet | null> => {
     try {
+      let wallet: Wallet | undefined;
       await connect(async () => {
-        const wallet = inAppWallet();
-        await wallet.connect({
+        const w = inAppWallet();
+        await w.connect({
           client,
           chain: liskSepolia,
           strategy: "passkey",
           type: "sign-up",
         });
-        return wallet;
+        wallet = w;
+        return w;
       });
-      return true;
+      return wallet || null;
     } catch (err) {
       console.error("Biometric registration failed:", err);
-      return false;
+      return null;
     }
   };
 

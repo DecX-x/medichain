@@ -156,6 +156,7 @@ function WalletConnection({
   const isPatient = role === "patient";
   const Icon = isPatient ? User : Building2;
   const { loginWithBiometric, isAuthenticating } = useBiometricAuth();
+  const [authMode, setAuthMode] = useState<"login" | "register">("login");
 
   return (
     <motion.div
@@ -168,56 +169,89 @@ function WalletConnection({
       {/* Glassmorphism Card */}
       <div className="backdrop-blur-xl bg-card/80 border border-border/50 rounded-3xl p-8 shadow-xl">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <div
             className={cn(
-              "w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg",
+              "w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg",
               isPatient
                 ? "bg-gradient-to-br from-primary to-[#0077C0] shadow-primary/25"
                 : "bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-emerald-500/25"
             )}
           >
-            <Icon className="w-10 h-10 text-white" />
+            <Icon className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground mb-2">
-            {isPatient ? "Patient Access" : "Hospital Access"}
+          <h1 className="text-2xl font-bold text-foreground mb-1">
+            {isPatient ? "Patient Portal" : "Hospital Portal"}
           </h1>
           <p className="text-muted-foreground text-sm">
-            Connect your wallet to continue
+            {authMode === "login" ? "Welcome back, please login" : "Create your decentralized identity"}
           </p>
+        </div>
+
+        {/* Auth Mode Tabs */}
+        <div className="flex p-1 bg-muted/50 rounded-xl mb-6">
+          <button
+            onClick={() => setAuthMode("login")}
+            className={cn(
+              "flex-1 py-2 text-sm font-medium rounded-lg transition-all duration-200",
+              authMode === "login"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            Login
+          </button>
+          <button
+            onClick={() => setAuthMode("register")}
+            className={cn(
+              "flex-1 py-2 text-sm font-medium rounded-lg transition-all duration-200",
+              authMode === "register"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            Register
+          </button>
         </div>
 
         {/* Biometric Login Option - Only for Patient */}
         {isPatient && (
           <>
             <div className="mb-6">
-              <button
-                onClick={() => loginWithBiometric()}
-                disabled={isAuthenticating}
-                className={cn(
-                  "w-full flex items-center justify-center gap-3 p-4 rounded-2xl border-2 transition-all duration-300",
-                  "bg-primary/5 border-primary/30 hover:bg-primary/10 hover:border-primary/50",
-                  isAuthenticating && "opacity-50 cursor-not-allowed"
-                )}
-              >
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-primary/10">
-                  <Fingerprint className="w-5 h-5 text-primary" />
-                </div>
-                <div className="text-left">
-                  <p className="font-semibold text-primary">
-                    {isAuthenticating ? "Connecting..." : "Login with Biometric"}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Fingerprint, Face ID, or Windows Hello
-                  </p>
-                </div>
-              </button>
+              {/* Only show Biometric button in Login mode */}
+              {authMode === "login" && (
+                <button
+                    onClick={async () => {
+                       await loginWithBiometric();
+                    }}
+                    disabled={isAuthenticating}
+                    className={cn(
+                    "w-full flex items-center justify-center gap-3 p-4 rounded-2xl border-2 transition-all duration-300",
+                    "bg-primary/5 border-primary/30 hover:bg-primary/10 hover:border-primary/50",
+                    isAuthenticating && "opacity-50 cursor-not-allowed"
+                    )}
+                >
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-primary/10">
+                    <Fingerprint className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="text-left">
+                    <p className="font-semibold text-primary">
+                        {isAuthenticating ? "Verifying..." : "Login with Biometric"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                        Use your registered Passkey
+                    </p>
+                    </div>
+                </button>
+              )}
             </div>
 
             {/* Divider */}
             <div className="flex items-center gap-4 mb-6">
               <div className="flex-1 h-px bg-border" />
-              <span className="text-xs text-muted-foreground">or connect wallet</span>
+              <span className="text-xs text-muted-foreground">
+                {authMode === "login" ? "or via wallet" : "Connect with Wallet"}
+              </span>
               <div className="flex-1 h-px bg-border" />
             </div>
           </>
@@ -235,7 +269,7 @@ function WalletConnection({
               },
             })}
             connectButton={{
-              label: "Connect Wallet",
+              label: authMode === "login" ? "Connect Wallet to Login" : "Connect Wallet to Register",
               style: {
                 width: "100%",
                 padding: "16px 24px",
@@ -246,7 +280,7 @@ function WalletConnection({
             }}
             connectModal={{
               size: "wide",
-              title: `Connect to MediChain`,
+              title: authMode === "login" ? "Sign In to MediChain" : "Join MediChain",
               showThirdwebBranding: false,
             }}
             showAllWallets={false}

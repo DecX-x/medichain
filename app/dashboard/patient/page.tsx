@@ -37,8 +37,8 @@ export default function PatientDashboard() {
   const router = useRouter()
 
   const handleLogout = async () => {
-    // Clear all app data including patient data and wallet history
-    clearAllAppData()
+    // We do NOT clear app data here, so that patient data persists across sessions.
+    // clearAllAppData() // <-- This was the cause of the bug
     
     // Properly disconnect the wallet
     if (account) {
@@ -48,23 +48,38 @@ export default function PatientDashboard() {
     router.push("/auth")
   }
 
-  const { registerBiometric } = useBiometricAuth()
+  const { registerBiometric, isAuthenticating } = useBiometricAuth()
+  // Alias for clarity in this context: we treat 'authenticating' (connecting) as 'registering/switching' process
+  const isRegistering = isAuthenticating;
 
   // Handle biometric toggle
   const handleBiometricToggle = async (enabled: boolean) => {
     if (enabled && account) {
       const currentAddress = account.address;
+      const currentData = getPatientData(currentAddress);
       
-      const success = await registerBiometric();
+      const newWallet = await registerBiometric();
       
-      if (success) {
-        // If registration created a NEW wallet address (which it likely did for passkey),
-        // we might want to handle data migration here if that is the intent.
-        // However, Thirdweb's `connect` might switch the `useActiveAccount` context automatically.
-        // We'll rely on the active account update or just mark enabled.
-        
-        // Note: In a real app, you'd link the passkey signer to the smart account 
-        // OR migrate data. For now, we assume the user wants to ENABLE it.
+      if (newWallet) {
+        // Get new address from the newly connected wallet
+        const newAccount = newWallet.getAccount();
+        const newAddress = newAccount?.address;
+
+        // If we have a new address and existing data, migrate it
+        if (newAddress && newAddress !== currentAddress && currentData) {
+            console.log("Migrating data from", currentAddress, "to", newAddress);
+            
+            const migratedData = { 
+                ...currentData, 
+                walletAddress: newAddress 
+            };
+            
+            // Save to storage for the new address
+            savePatientData(migratedData);
+            
+            // Update local state immediately so UI doesn't flash registration form
+            setPatientData(migratedData);
+        }
         
         setBiometricEnabled(true)
         saveBiometricEnabled(true)
@@ -79,7 +94,8 @@ export default function PatientDashboard() {
   }
 
   useEffect(() => {
-    if (!account) {
+    // If we are currently registering/switching wallets, don't redirect
+    if (!account && !isRegistering) {
       router.push("/auth")
       return
     }
@@ -89,16 +105,19 @@ export default function PatientDashboard() {
     setBiometricEnabled(getBiometricEnabled() ?? false)
 
     // Check if patient is already registered
-    const existingData = getPatientData(account.address)
-    setPatientData(existingData)
+    if (account) {
+        const existingData = getPatientData(account.address)
+        setPatientData(existingData)
+    }
     setIsLoading(false)
-  }, [account, router])
+  }, [account, router, isRegistering])
 
-  if (!account) {
+  if (!account && !isRegistering) {
     return null
   }
 
-  if (isLoading) {
+  // While switching wallets or loading, show loader
+  if (isLoading || isRegistering || !account) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -178,7 +197,7 @@ export default function PatientDashboard() {
               },
             }}
             onDisconnect={() => {
-              clearAllAppData()
+              // clearAllAppData() // Keep data persisted
               router.push("/auth")
             }}
           />
