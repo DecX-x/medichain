@@ -1,148 +1,144 @@
+// components/mvp-showcase.tsx
 "use client"
 
 import { motion } from "framer-motion"
-import Image from "next/image"
-import { User, Building2 } from "lucide-react"
+import { Shield, QrCode, Lock, History, FileCheck, Share2, Building2, ClipboardCheck } from "lucide-react"
 
-export function MVPShowcase() {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-        delayChildren: 0.1,
-      },
-    },
-  }
+interface MVPShowcaseProps {
+  activeTab: "patient" | "hospital"
+}
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    show: { 
-      opacity: 1, 
-      y: 0,
-      transition: {
-        duration: 0.6,
-        ease: "easeOut" as const
-      }
-    },
-  }
+const patientFeatures = [
+  {
+    icon: QrCode,
+    title: "QR Code Access",
+    description: "Generate secure QR codes for instant healthcare data sharing",
+  },
+  {
+    icon: Shield,
+    title: "Data Ownership",
+    description: "Full control over who can access your medical records",
+  },
+  {
+    icon: Lock,
+    title: "Blockchain Security",
+    description: "Your health data encrypted and stored on decentralized network",
+  },
+  {
+    icon: History,
+    title: "Access History",
+    description: "Track every access to your medical records in real-time",
+  },
+]
 
-  const features = [
-    {
-      title: "Patient Dashboard",
-      description: "Full access to your personal medical records with blockchain security. View visit history, active prescriptions, and allergy status in one unified view.",
-      image: "/mvp-patient-dashboard.png",
-      highlights: [
-        "QR Code for instant identity verification",
-        "Only you hold the keys",
-        "Real-time medical activity tracking",
-      ],
-      gradient: "from-[#0077C0]/20 to-primary/20",
-      badge: "For Patients",
-      icon: User
-    },
-    {
-      title: "Hospital Portal",
-      description: "Manage patient queues efficiently. Scan QR codes for instant medical record access, eliminating time-consuming manual processes.",
-      image: "/mvp-hospital-portal.png",
-      highlights: [
-        "Real-time patient queue management",
-        "Automatic identity verification",
-        "Access medical data with patient consent",
-      ],
-      gradient: "from-primary/20 to-secondary/40",
-      badge: "For Hospitals",
-      icon: Building2
-    }
-  ]
+const hospitalFeatures = [
+  {
+    icon: FileCheck,
+    title: "Consent Verification",
+    description: "Access patient data only with verified blockchain consent",
+  },
+  {
+    icon: Share2,
+    title: "Instant Access",
+    description: "Scan QR code to instantly retrieve patient records",
+  },
+  {
+    icon: Building2,
+    title: "Multi-Hospital",
+    description: "Seamless data sharing across healthcare networks",
+  },
+  {
+    icon: ClipboardCheck,
+    title: "HIPAA Compliant",
+    description: "Enterprise-grade security meeting healthcare standards",
+  },
+]
+
+export function MVPShowcase({ activeTab }: MVPShowcaseProps) {
+  const features = activeTab === "patient" ? patientFeatures : hospitalFeatures
+  const isPatient = activeTab === "patient"
 
   return (
-    <section className="relative py-24 px-4 md:px-12 lg:px-20 bg-gradient-to-b from-background to-secondary/10 overflow-hidden">
-      {/* Background decorative */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-40 -left-20 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-40 -right-20 w-72 h-72 bg-blue-400/10 rounded-full blur-3xl" />
-      </div>
+    <section className={`py-20 px-4 md:px-12 lg:px-20 overflow-hidden transition-colors duration-500 ${
+      isPatient 
+        ? "bg-gradient-to-br from-primary/10 via-primary/5 to-background" 
+        : "bg-gradient-to-br from-teal-600/10 via-teal-500/5 to-background"
+    }`}>
+      <div className="max-w-6xl mx-auto">
+        <div className="flex flex-col lg:flex-row items-start gap-12 lg:gap-20">
+          
+          {/* Left Side - Text Content */}
+          <motion.div 
+            className="flex-1 lg:max-w-md"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            {/* Tagline */}
+            <p className={`text-xs md:text-sm font-semibold tracking-[0.2em] uppercase mb-4 ${
+              isPatient ? "text-primary" : "text-teal-600"
+            }`}>
+              {isPatient 
+                ? "Secure. Control. Share. Track." 
+                : "Verify. Access. Connect. Comply."}
+            </p>
+            
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
+              <span className="text-foreground">
+                {isPatient ? "Your Health, " : "Patient Data, "}
+              </span>
+              <br />
+              <span className={`bg-clip-text text-transparent ${
+                isPatient 
+                  ? "bg-gradient-to-r from-primary to-[#0077C0]"    
+                  : "bg-gradient-to-r from-teal-600 to-teal-500"
+              }`}>
+                {isPatient ? "Your Control" : "With Consent"}
+              </span>
+            </h2>
+            
+            <p className="text-muted-foreground text-sm md:text-base">
+              {isPatient 
+                ? "Take ownership of your medical records with blockchain technology."
+                : "Access verified patient data securely through decentralized consent."}
+            </p>
+          </motion.div>
 
-      <motion.div 
-        className="max-w-7xl mx-auto relative z-10"
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, margin: "-100px" }}
-      >
-        {/* Section Header */}
-        <motion.div variants={itemVariants} className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
-            One Platform, Two{" "}
-            <span className="bg-gradient-to-r from-primary to-[#0077C0] bg-clip-text text-transparent">
-              Integrated Solutions
-            </span>
-          </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            MediChain connects patients and hospitals in a secure and transparent healthcare ecosystem.
-          </p>
-        </motion.div>
-
-        {/* Feature Cards */}
-        <div className="space-y-20">
-          {features.map((feature, index) => (
-            <motion.div
-              key={feature.title}
-              variants={itemVariants}
-              className={`flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-12`}
-            >
-              {/* Image */}
-              <div className="flex-1 relative group">
-                <div className={`absolute inset-0 bg-gradient-to-r ${feature.gradient} rounded-3xl blur-2xl opacity-50 group-hover:opacity-70 transition-opacity duration-500`} />
-                <motion.div 
-                  className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-white/5 backdrop-blur-sm"
-                  whileHover={{ y: -5, scale: 1.02 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <Image
-                    src={feature.image}
-                    alt={feature.title}
-                    width={600}
-                    height={400}
-                    className="w-full h-auto object-cover"
-                  />
-                </motion.div>
-              </div>
-
-              {/* Content */}
-              <div className="flex-1 space-y-6">
-                <span className="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold uppercase tracking-wider bg-primary/10 text-primary rounded-full">
-                  <feature.icon className="w-3.5 h-3.5" />
-                  {feature.badge}
-                </span>
-                <h3 className="text-2xl md:text-3xl font-bold">{feature.title}</h3>
-                <p className="text-muted-foreground text-lg leading-relaxed">
+          {/* Right Side - Feature Grid */}
+          <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
+            {features.map((feature, index) => (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
+                className="group"
+              >
+                {/* Icon */}
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-colors ${
+                  isPatient 
+                    ? "bg-primary/10 text-primary" 
+                    : "bg-teal-500/10 text-teal-600"
+                }`}>
+                  <feature.icon className="w-5 h-5" />
+                </div>
+                
+                {/* Title */}
+                <h3 className="font-bold text-foreground mb-2 uppercase tracking-wide text-sm">
+                  {feature.title}
+                </h3>
+                
+                {/* Description */}
+                <p className="text-sm text-muted-foreground">
                   {feature.description}
                 </p>
-                
-                {/* Highlights - Simple list */}
-                <ul className="space-y-2 pt-4">
-                  {feature.highlights.map((highlight, i) => (
-                    <motion.li 
-                      key={i}
-                      className="flex items-center gap-3 text-foreground"
-                      initial={{ opacity: 0, x: -10 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.3 + i * 0.1 }}
-                      viewport={{ once: true }}
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
-                      {highlight}
-                    </motion.li>
-                  ))}
-                </ul>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            ))}
+          </div>
         </div>
-      </motion.div>
+      </div>
     </section>
   )
 }

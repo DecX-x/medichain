@@ -1,8 +1,8 @@
+// components/user-flow.tsx
 "use client"
 
 import { motion } from "framer-motion"
 import { Wallet, FileText, QrCode, Share, ScanLine, ClipboardList, CheckCircle } from "lucide-react"
-import { DotPattern } from "./ui/dot-pattern"
 
 interface UserFlowProps {
   activeTab: "patient" | "hospital"
@@ -12,7 +12,7 @@ export function UserFlow({ activeTab }: UserFlowProps) {
   const patientSteps = [
     { icon: Wallet, title: "Connect Wallet", desc: "Connect your wallet" },
     { icon: FileText, title: "Fill Your Data", desc: "Complete basic information" },
-    { icon: QrCode, title: "Get QR Code", desc: "Your digital identity" },
+    { icon: QrCode, title: "Get QR Code", desc: "Your digital identity (ERC-721)" },
     { icon: Share, title: "Share to Hospital", desc: "Grant data access" },
   ]
 
@@ -24,95 +24,148 @@ export function UserFlow({ activeTab }: UserFlowProps) {
   ]
 
   const steps = activeTab === "patient" ? patientSteps : hospitalSteps
-  const accentColor = activeTab === "patient" ? "primary" : "teal"
+  const isPatient = activeTab === "patient"
 
   return (
-    <section className="py-20 px-4 md:px-12 lg:px-20 bg-gradient-to-b from-background via-secondary/5 to-background relative overflow-hidden">
-      {/* Background subtle pattern */}
-      <div className="absolute inset-0 opacity-30">
-        <div className={`absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl ${
-          activeTab === "patient" ? "bg-primary/5" : "bg-teal-500/5"
-        }`} />
-        <div className={`absolute bottom-0 left-0 w-96 h-96 rounded-full blur-3xl ${
-          activeTab === "patient" ? "bg-blue-400/5" : "bg-teal-400/5"
-        }`} />
-      </div>
+    <section className="py-20 px-4 md:px-12 lg:px-20 bg-gradient-to-b from-background to-secondary/5 relative overflow-hidden">
+      <style>{`
+        @keyframes marchDown {
+          0% { background-position: 0 0; }
+          100% { background-position: 0 16px; }
+        }
+        @keyframes marchRight {
+          0% { background-position: 0 0; }
+          100% { background-position: 16px 0; }
+        }
+        .march-down {
+          animation: marchDown 0.4s linear infinite;
+        }
+        .march-right {
+          animation: marchRight 0.4s linear infinite;
+        }
+      `}</style>
 
-      <DotPattern className="opacity-40" />
-
-      <div className="max-w-6xl mx-auto relative z-10">
-        {/* Section Header */}
-        <motion.div 
-          className="text-center mb-16"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-         
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8 tracking-tight leading-[1.1]">
-            <span className={`bg-clip-text text-transparent ${
-              activeTab === "patient" 
-                ? "bg-gradient-to-r from-primary to-[#0077C0]" 
-                : "bg-gradient-to-r from-teal-600 to-teal-500"
-            }`}>
-              {activeTab === "patient" ? "The Simplicity Is Yours" : "Access Data in 4 Steps"}
-            </span>
-          </h2>
-          <p className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
-            {activeTab === "patient" 
-              ? "Simple process to secure your health data with only 4 steps and you can access your data at any time"
-              : "Efficient workflow to access and manage patient data"
-            }
-          </p>
-        </motion.div>
-
-        {/* Steps Flow - Timeline Style */}
-        <div className="relative">
-          {/* Connection Line */}
-          <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-border to-transparent hidden md:block" />
+      <div className="max-w-6xl mx-auto">
+        <div className="flex flex-col lg:flex-row items-start gap-12 lg:gap-16">
           
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-4">
-            {steps.map((step, index) => (
-              <motion.div
-                key={step.title}
-                className="relative"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.15 }}
-              >
-                {/* Step Card */}
-                <motion.div 
-                  className="flex flex-col items-center text-center p-6 rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50 hover:border-border hover:shadow-md transition-all duration-300"
-                  whileHover={{ y: -5 }}
-                >
-                  {/* Number + Icon Combined */}
-                  <div className="relative mb-5">
-                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${
-                      activeTab === "patient"
-                        ? "bg-gradient-to-br from-primary/20 to-primary/10"
-                        : "bg-gradient-to-br from-teal-500/20 to-teal-500/10"
-                    }`}>
-                      <step.icon className={`w-8 h-8 ${
-                        activeTab === "patient" ? "text-primary" : "text-teal-600"
-                      }`} />
+          {/* Left Side - Text Content */}
+          <motion.div 
+            className="flex-1 lg:max-w-sm lg:sticky lg:top-32"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <p className={`text-xs md:text-sm font-semibold tracking-[0.2em] uppercase mb-4 ${
+              isPatient ? "text-primary" : "text-teal-600"
+            }`}>
+              How It Works
+            </p>
+            
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-6">
+              <span className={`bg-clip-text text-transparent ${
+                isPatient 
+                  ? "bg-gradient-to-r from-primary to-[#0077C0]" 
+                  : "bg-gradient-to-r from-teal-600 to-teal-500"
+              }`}>
+                {isPatient ? "Just a few steps to secure your data" : "Access Patient Data Securely"}
+              </span>
+            </h2>
+            
+            <p className="text-muted-foreground text-sm md:text-base">
+              {isPatient 
+                ? "Take control of your medical records in just 4 simple steps."
+                : "Efficient workflow to access and manage patient data with consent."}
+            </p>
+          </motion.div>
+
+          {/* Right Side - Flow Container */}
+          <div className="flex-1">
+            <div className={`relative rounded-3xl border-2 border-dashed p-6 md:p-8 ${
+              isPatient ? "border-primary/30" : "border-teal-500/30"
+            }`}>
+              {steps.map((step, index) => {
+                const isEven = index % 2 === 0
+                const isLast = index === steps.length - 1
+                const dashColor = isPatient ? "#3b82f6" : "#14b8a6"
+                
+                return (
+                  <motion.div
+                    key={step.title}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: index * 0.15 }}
+                    className="relative"
+                  >
+                    {/* Step Card */}
+                    <div className={`flex ${isEven ? "justify-start" : "justify-end"}`}>
+                      <div className={`flex items-center gap-4 p-4 rounded-2xl bg-card/80 backdrop-blur-sm border border-border/50 max-w-[260px] ${
+                        !isEven ? "flex-row-reverse text-right" : ""
+                      }`}>
+                        <div className={`relative flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center ${
+                          isPatient ? "bg-primary/10" : "bg-teal-500/10"
+                        }`}>
+                          <step.icon className={`w-5 h-5 ${isPatient ? "text-primary" : "text-teal-600"}`} />
+                          <div className={`absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white ${
+                            isPatient ? "bg-primary" : "bg-teal-600"
+                          }`}>
+                            {index + 1}
+                          </div>
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-foreground text-sm">{step.title}</h3>
+                          <p className="text-xs text-muted-foreground">{step.desc}</p>
+                        </div>
+                      </div>
                     </div>
-                    {/* Number Badge */}
-                    <div className={`absolute -top-2 -right-2 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-lg ${
-                      activeTab === "patient" 
-                        ? "bg-primary" 
-                        : "bg-teal-600"
-                    }`}>
-                      {index + 1}
-                    </div>
-                  </div>
-                  
-                  {/* Text */}
-                  <h3 className="font-bold text-foreground text-base mb-2">{step.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
-                </motion.div>
-              </motion.div>
-            ))}
+
+                    {/* Connector Lines with marching animation */}
+                    {!isLast && (
+                      <div className="relative h-16 my-1">
+                        {/* Vertical line down */}
+                        <div 
+                          className="absolute w-0.5 march-down"
+                          style={{ 
+                            height: "20px",
+                            top: 0,
+                            left: isEven ? "130px" : "auto",
+                            right: isEven ? "auto" : "130px",
+                            background: `repeating-linear-gradient(to bottom, ${dashColor} 0px, ${dashColor} 4px, transparent 4px, transparent 8px)`,
+                            opacity: 0.6
+                          }}
+                        />
+                        
+                        {/* Horizontal line */}
+                        <div 
+                          className="absolute h-0.5 march-right"
+                          style={{ 
+                            top: "20px",
+                            left: "130px",
+                            right: "130px",
+                            background: `repeating-linear-gradient(to right, ${dashColor} 0px, ${dashColor} 4px, transparent 4px, transparent 8px)`,
+                            opacity: 0.6
+                          }}
+                        />
+                        
+                        {/* Vertical line down to next */}
+                        <div 
+                          className="absolute w-0.5 march-down"
+                          style={{ 
+                            height: "20px",
+                            top: "20px",
+                            left: isEven ? "auto" : "130px",
+                            right: isEven ? "130px" : "auto",
+                            background: `repeating-linear-gradient(to bottom, ${dashColor} 0px, ${dashColor} 4px, transparent 4px, transparent 8px)`,
+                            opacity: 0.6
+                          }}
+                        />
+                      </div>
+                    )}
+                  </motion.div>
+                )
+              })}
+            </div>
           </div>
         </div>
       </div>
