@@ -32,9 +32,23 @@ interface ScannedPatientData {
 }
 
 interface MedicalRecordInput {
-  diagnosis: string;
-  symptoms: string;
-  treatment: string;
+  // Basic Info
+  noRekamMedik: string;
+  tanggalMasuk: string;
+  tanggalKeluar: string;
+  // Diagnosis
+  diagnosisUtama: string;
+  icdCode: string;
+  diagnosisSekunder: string;
+  // Clinical Details
+  keluhan: string;
+  riwayatAlergi: string;
+  tindakan: string;
+  // Treatment
+  resepObat: string;
+  // Outcome
+  keadaanKeluar: "sembuh" | "membaik" | "belumSembuh" | "meninggal" | "";
+  dokterPenanggungJawab: string;
 }
 
 type FlowStep = "search" | "input" | "success";
@@ -47,9 +61,18 @@ export default function HospitalDashboard() {
   const [currentStep, setCurrentStep] = useState<FlowStep>("search");
   const [patient, setPatient] = useState<ScannedPatientData | null>(null);
   const [medicalRecord, setMedicalRecord] = useState<MedicalRecordInput>({
-    diagnosis: "",
-    symptoms: "",
-    treatment: "",
+    noRekamMedik: "",
+    tanggalMasuk: new Date().toISOString().split('T')[0],
+    tanggalKeluar: "",
+    diagnosisUtama: "",
+    icdCode: "",
+    diagnosisSekunder: "",
+    keluhan: "",
+    riwayatAlergi: "",
+    tindakan: "",
+    resepObat: "",
+    keadaanKeluar: "",
+    dokterPenanggungJawab: "",
   });
   
   // Search state
@@ -81,7 +104,20 @@ export default function HospitalDashboard() {
   const handleReset = () => {
     setCurrentStep("search");
     setPatient(null);
-    setMedicalRecord({ diagnosis: "", symptoms: "", treatment: "" });
+    setMedicalRecord({
+      noRekamMedik: "",
+      tanggalMasuk: new Date().toISOString().split('T')[0],
+      tanggalKeluar: "",
+      diagnosisUtama: "",
+      icdCode: "",
+      diagnosisSekunder: "",
+      keluhan: "",
+      riwayatAlergi: "",
+      tindakan: "",
+      resepObat: "",
+      keadaanKeluar: "",
+      dokterPenanggungJawab: "",
+    });
     setNikInput("");
   };
 
@@ -276,7 +312,7 @@ function InputRecordStep({
   onBack: () => void;
 }) {
   const [activeTab, setActiveTab] = useState<"history" | "new">("history");
-  const isFormValid = medicalRecord.diagnosis && medicalRecord.symptoms && medicalRecord.treatment;
+  const isFormValid = medicalRecord.diagnosisUtama && medicalRecord.keluhan && medicalRecord.dokterPenanggungJawab;
 
   // Sample medical history data
   const medicalHistory = [
@@ -431,44 +467,156 @@ function InputRecordStep({
                 )}
               </div>
             ) : (
-              /* New Record Form */
+              /* New Record Form with OCR */
               <div className="space-y-5">
-                {/* Diagnosis */}
-                <div>
-                  <label className="block text-sm font-medium text-muted-foreground mb-2">
-                    DIAGNOSA UTAMA
-                  </label>
-                  <input
-                    type="text"
-                    value={medicalRecord.diagnosis}
-                    onChange={(e) => setMedicalRecord({ ...medicalRecord, diagnosis: e.target.value })}
-                    placeholder="Contoh: Influenza A"
-                    className="w-full h-12 px-4 bg-muted/30 border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-teal-500/20"
-                  />
+                {/* OCR Upload Section */}
+                <OCRUploadSection 
+                  onOCRComplete={(data) => setMedicalRecord(data)}
+                />
+
+                {/* Divider */}
+                <div className="flex items-center gap-4">
+                  <div className="flex-1 h-px bg-border" />
+                  <span className="text-xs text-muted-foreground uppercase">Atau Input Manual</span>
+                  <div className="flex-1 h-px bg-border" />
                 </div>
 
-                {/* Symptoms & Treatment */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Row 1: No RM & Tanggal */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-muted-foreground mb-2">
-                      KELUHAN / GEJALA
-                    </label>
-                    <textarea
-                      value={medicalRecord.symptoms}
-                      onChange={(e) => setMedicalRecord({ ...medicalRecord, symptoms: e.target.value })}
-                      placeholder="Detail keluhan pasien..."
-                      className="w-full h-32 px-4 py-3 bg-muted/30 border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-teal-500/20 resize-none"
+                    <label className="block text-xs font-medium text-muted-foreground mb-1.5">NO. REKAM MEDIK</label>
+                    <input
+                      type="text"
+                      value={medicalRecord.noRekamMedik}
+                      onChange={(e) => setMedicalRecord({ ...medicalRecord, noRekamMedik: e.target.value })}
+                      placeholder="RM-2024-00001"
+                      className="w-full h-10 px-3 bg-muted/30 border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-teal-500/20"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-muted-foreground mb-2">
-                      TINDAKAN / RESEP
-                    </label>
+                    <label className="block text-xs font-medium text-muted-foreground mb-1.5">TANGGAL MASUK (MRS)</label>
+                    <input
+                      type="date"
+                      value={medicalRecord.tanggalMasuk}
+                      onChange={(e) => setMedicalRecord({ ...medicalRecord, tanggalMasuk: e.target.value })}
+                      className="w-full h-10 px-3 bg-muted/30 border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-muted-foreground mb-1.5">TANGGAL KELUAR (KRS)</label>
+                    <input
+                      type="date"
+                      value={medicalRecord.tanggalKeluar}
+                      onChange={(e) => setMedicalRecord({ ...medicalRecord, tanggalKeluar: e.target.value })}
+                      className="w-full h-10 px-3 bg-muted/30 border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                    />
+                  </div>
+                </div>
+
+                {/* Row 2: Diagnosa */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-medium text-muted-foreground mb-1.5">DIAGNOSA UTAMA *</label>
+                    <input
+                      type="text"
+                      value={medicalRecord.diagnosisUtama}
+                      onChange={(e) => setMedicalRecord({ ...medicalRecord, diagnosisUtama: e.target.value })}
+                      placeholder="Contoh: Bronchitis Akut"
+                      className="w-full h-10 px-3 bg-muted/30 border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-muted-foreground mb-1.5">KODE ICD-X</label>
+                    <input
+                      type="text"
+                      value={medicalRecord.icdCode}
+                      onChange={(e) => setMedicalRecord({ ...medicalRecord, icdCode: e.target.value })}
+                      placeholder="J20.9"
+                      className="w-full h-10 px-3 bg-muted/30 border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                    />
+                  </div>
+                </div>
+
+                {/* Row 3: Diagnosa Sekunder */}
+                <div>
+                  <label className="block text-xs font-medium text-muted-foreground mb-1.5">DIAGNOSA SEKUNDER / KOMPLIKASI</label>
+                  <input
+                    type="text"
+                    value={medicalRecord.diagnosisSekunder}
+                    onChange={(e) => setMedicalRecord({ ...medicalRecord, diagnosisSekunder: e.target.value })}
+                    placeholder="Jika ada..."
+                    className="w-full h-10 px-3 bg-muted/30 border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                  />
+                </div>
+
+                {/* Row 4: Keluhan & Riwayat Alergi */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-muted-foreground mb-1.5">KELUHAN / GEJALA *</label>
                     <textarea
-                      value={medicalRecord.treatment}
-                      onChange={(e) => setMedicalRecord({ ...medicalRecord, treatment: e.target.value })}
+                      value={medicalRecord.keluhan}
+                      onChange={(e) => setMedicalRecord({ ...medicalRecord, keluhan: e.target.value })}
+                      placeholder="Detail keluhan pasien..."
+                      className="w-full h-24 px-3 py-2 bg-muted/30 border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-teal-500/20 resize-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-muted-foreground mb-1.5">RIWAYAT ALERGI</label>
+                    <textarea
+                      value={medicalRecord.riwayatAlergi}
+                      onChange={(e) => setMedicalRecord({ ...medicalRecord, riwayatAlergi: e.target.value })}
+                      placeholder="Tidak ada / Sebutkan..."
+                      className="w-full h-24 px-3 py-2 bg-muted/30 border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-teal-500/20 resize-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Row 5: Tindakan & Resep */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-muted-foreground mb-1.5">TINDAKAN / OPERASI</label>
+                    <textarea
+                      value={medicalRecord.tindakan}
+                      onChange={(e) => setMedicalRecord({ ...medicalRecord, tindakan: e.target.value })}
+                      placeholder="Pemeriksaan, prosedur, operasi..."
+                      className="w-full h-24 px-3 py-2 bg-muted/30 border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-teal-500/20 resize-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-muted-foreground mb-1.5">RESEP OBAT</label>
+                    <textarea
+                      value={medicalRecord.resepObat}
+                      onChange={(e) => setMedicalRecord({ ...medicalRecord, resepObat: e.target.value })}
                       placeholder="Obat yang diberikan..."
-                      className="w-full h-32 px-4 py-3 bg-muted/30 border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-teal-500/20 resize-none"
+                      className="w-full h-24 px-3 py-2 bg-muted/30 border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-teal-500/20 resize-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Row 6: Keadaan Keluar & Dokter */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-muted-foreground mb-1.5">KEADAAN KELUAR</label>
+                    <select
+                      value={medicalRecord.keadaanKeluar}
+                      onChange={(e) => setMedicalRecord({ ...medicalRecord, keadaanKeluar: e.target.value as MedicalRecordInput["keadaanKeluar"] })}
+                      className="w-full h-10 px-3 bg-muted/30 border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                    >
+                      <option value="">Pilih...</option>
+                      <option value="sembuh">Sembuh</option>
+                      <option value="membaik">Membaik</option>
+                      <option value="belumSembuh">Belum Sembuh</option>
+                      <option value="meninggal">Meninggal</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-muted-foreground mb-1.5">DOKTER PENANGGUNG JAWAB *</label>
+                    <input
+                      type="text"
+                      value={medicalRecord.dokterPenanggungJawab}
+                      onChange={(e) => setMedicalRecord({ ...medicalRecord, dokterPenanggungJawab: e.target.value })}
+                      placeholder="dr. Nama Lengkap, Sp.X"
+                      className="w-full h-10 px-3 bg-muted/30 border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-teal-500/20"
                     />
                   </div>
                 </div>
@@ -487,6 +635,137 @@ function InputRecordStep({
           </CardContent>
         </Card>
       </div>
+    </div>
+  );
+}
+
+// OCR Upload Section Component
+import { Upload, Loader2, FileCheck, Sparkles } from "lucide-react";
+
+function OCRUploadSection({
+  onOCRComplete,
+}: {
+  onOCRComplete: (data: MedicalRecordInput) => void;
+}) {
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isComplete, setIsComplete] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Show preview
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setUploadedImage(event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    // Simulate OCR processing
+    setIsProcessing(true);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Mock OCR result - in production this would call Tesseract.js or an API
+    const mockResult: MedicalRecordInput = {
+      noRekamMedik: "RM-2024-00123",
+      tanggalMasuk: new Date().toISOString().split('T')[0],
+      tanggalKeluar: "",
+      diagnosisUtama: "Bronchitis Akut",
+      icdCode: "J20.9",
+      diagnosisSekunder: "",
+      keluhan: "Batuk berdahak selama 5 hari, demam ringan 37.8°C, sesak napas ringan, nyeri dada saat batuk",
+      riwayatAlergi: "Tidak ada",
+      tindakan: "Pemeriksaan fisik, Rontgen thorax",
+      resepObat: "Ambroxol 30mg 3x1, Salbutamol 2mg 3x1, Paracetamol 500mg 3x1 (jika demam)",
+      keadaanKeluar: "",
+      dokterPenanggungJawab: "dr. Ahmad Pratama, Sp.P",
+    };
+
+    setIsProcessing(false);
+    setIsComplete(true);
+    onOCRComplete(mockResult);
+  };
+
+  const handleReset = () => {
+    setUploadedImage(null);
+    setIsProcessing(false);
+    setIsComplete(false);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  return (
+    <div className="border-2 border-dashed border-border rounded-xl p-6 bg-muted/20">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileUpload}
+        className="hidden"
+      />
+
+      {!uploadedImage ? (
+        // Upload State
+        <div 
+          className="flex flex-col items-center justify-center py-8 cursor-pointer hover:bg-muted/30 rounded-lg transition-colors"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <div className="w-16 h-16 bg-teal-500/10 rounded-2xl flex items-center justify-center mb-4">
+            <Upload className="w-8 h-8 text-teal-600" />
+          </div>
+          <h4 className="font-semibold text-foreground mb-1">Upload Dokumen Medis</h4>
+          <p className="text-sm text-muted-foreground text-center max-w-xs">
+            Upload foto resep, hasil lab, atau dokumen diagnosa untuk auto-fill form
+          </p>
+          <div className="flex items-center gap-2 mt-4 text-xs text-teal-600">
+            <Sparkles className="w-3 h-3" />
+            <span>Powered by OCR</span>
+          </div>
+        </div>
+      ) : (
+        // Preview & Processing State
+        <div className="space-y-4">
+          {/* Image Preview */}
+          <div className="relative aspect-[4/3] w-full max-w-xs mx-auto rounded-lg overflow-hidden bg-black">
+            <img 
+              src={uploadedImage} 
+              alt="Uploaded document" 
+              className="w-full h-full object-contain"
+            />
+            {isProcessing && (
+              <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
+                <Loader2 className="w-8 h-8 text-teal-400 animate-spin mb-2" />
+                <p className="text-white text-sm">Memproses OCR...</p>
+              </div>
+            )}
+            {isComplete && (
+              <div className="absolute inset-0 bg-emerald-600/80 flex flex-col items-center justify-center">
+                <FileCheck className="w-10 h-10 text-white mb-2" />
+                <p className="text-white font-semibold">Auto-fill Berhasil!</p>
+              </div>
+            )}
+          </div>
+
+          {/* Actions */}
+          <div className="flex justify-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleReset}
+              disabled={isProcessing}
+            >
+              Upload Ulang
+            </Button>
+          </div>
+
+          {isComplete && (
+            <p className="text-xs text-center text-emerald-600">
+              ✓ Data berhasil di-extract. Silakan review dan edit jika perlu.
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

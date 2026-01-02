@@ -13,18 +13,25 @@ import {
   X,
   Stethoscope,
   FlaskConical,
-  Printer
+  Printer,
+  User
 } from "lucide-react"
 
-// Medical record type
+// Medical record type - matching rekam medis format
 export interface MedicalRecord {
   id: number
-  date: string
-  dateSort: Date
-  title: string
-  status: string
-  symptoms: string
-  treatment: string
+  noRekamMedik: string
+  tanggalMasuk: string
+  tanggalKeluar: string
+  diagnosisUtama: string
+  icdCode: string
+  diagnosisSekunder: string
+  keluhan: string
+  riwayatAlergi: string
+  tindakan: string
+  resepObat: string
+  keadaanKeluar: string
+  dokterPenanggungJawab: string
   hospital: string
   category: "Diagnose" | "Lab"
 }
@@ -33,56 +40,86 @@ export interface MedicalRecord {
 export const medicalRecords: MedicalRecord[] = [
   {
     id: 1,
-    date: "15 Desember 2024",
-    dateSort: new Date("2024-12-15"),
-    title: "Influenza A",
-    status: "Completed",
-    symptoms: "Demam tinggi, batuk kering, nyeri otot, sakit kepala, lemas",
-    treatment: "Paracetamol 500mg 3x1, Oseltamivir 75mg 2x1, Istirahat total 5 hari",
+    noRekamMedik: "RM-2024-00145",
+    tanggalMasuk: "15 Desember 2024",
+    tanggalKeluar: "15 Desember 2024",
+    diagnosisUtama: "Influenza A",
+    icdCode: "J10.1",
+    diagnosisSekunder: "",
+    keluhan: "Demam tinggi, batuk kering, nyeri otot, sakit kepala, lemas",
+    riwayatAlergi: "Tidak ada",
+    tindakan: "Pemeriksaan fisik, cek suhu",
+    resepObat: "Paracetamol 500mg 3x1, Oseltamivir 75mg 2x1, Istirahat total 5 hari",
+    keadaanKeluar: "Membaik",
+    dokterPenanggungJawab: "dr. Sarah Wijaya, Sp.PD",
     hospital: "RS Siloam Jakarta Selatan",
     category: "Diagnose"
   },
   {
     id: 2,
-    date: "28 November 2024",
-    dateSort: new Date("2024-11-28"),
-    title: "Gastritis Akut",
-    status: "Completed",
-    symptoms: "Nyeri ulu hati, mual, kembung, tidak nafsu makan",
-    treatment: "Omeprazole 20mg 1x1, Antasida 3x1, Hindari makanan pedas & asam",
+    noRekamMedik: "RM-2024-00098",
+    tanggalMasuk: "28 November 2024",
+    tanggalKeluar: "28 November 2024",
+    diagnosisUtama: "Gastritis Akut",
+    icdCode: "K29.0",
+    diagnosisSekunder: "",
+    keluhan: "Nyeri ulu hati, mual, kembung, tidak nafsu makan",
+    riwayatAlergi: "Tidak ada",
+    tindakan: "Endoskopi",
+    resepObat: "Omeprazole 20mg 1x1, Antasida 3x1, Hindari makanan pedas & asam",
+    keadaanKeluar: "Membaik",
+    dokterPenanggungJawab: "dr. Budi Santoso, Sp.PD-KGEH",
     hospital: "RS Pondok Indah Bintaro",
     category: "Diagnose"
   },
   {
     id: 3,
-    date: "5 Oktober 2024",
-    dateSort: new Date("2024-10-05"),
-    title: "Tension Headache",
-    status: "Completed",
-    symptoms: "Sakit kepala tegang, leher kaku, mata lelah, sulit konsentrasi",
-    treatment: "Ibuprofen 400mg bila perlu, Myonal 50mg 2x1, Fisioterapi leher",
+    noRekamMedik: "RM-2024-00075",
+    tanggalMasuk: "5 Oktober 2024",
+    tanggalKeluar: "5 Oktober 2024",
+    diagnosisUtama: "Tension Headache",
+    icdCode: "G44.2",
+    diagnosisSekunder: "",
+    keluhan: "Sakit kepala tegang, leher kaku, mata lelah, sulit konsentrasi",
+    riwayatAlergi: "Alergi Ibuprofen",
+    tindakan: "CT Scan kepala",
+    resepObat: "Paracetamol 500mg bila perlu, Myonal 50mg 2x1, Fisioterapi leher",
+    keadaanKeluar: "Membaik",
+    dokterPenanggungJawab: "dr. Linda Kusuma, Sp.S",
     hospital: "Klinik Medika Surabaya",
     category: "Diagnose"
   },
   {
     id: 4,
-    date: "10 Desember 2024",
-    dateSort: new Date("2024-12-10"),
-    title: "Complete Blood Count (CBC)",
-    status: "Completed",
-    symptoms: "Pemeriksaan rutin",
-    treatment: "Hemoglobin: 14.5 g/dL, Leukosit: 7.200/µL, Trombosit: 250.000/µL",
+    noRekamMedik: "RM-2024-00142",
+    tanggalMasuk: "10 Desember 2024",
+    tanggalKeluar: "10 Desember 2024",
+    diagnosisUtama: "Complete Blood Count (CBC)",
+    icdCode: "Z01.7",
+    diagnosisSekunder: "",
+    keluhan: "Pemeriksaan rutin",
+    riwayatAlergi: "Tidak ada",
+    tindakan: "Pengambilan sampel darah",
+    resepObat: "Hemoglobin: 14.5 g/dL, Leukosit: 7.200/µL, Trombosit: 250.000/µL",
+    keadaanKeluar: "Selesai",
+    dokterPenanggungJawab: "dr. Andi Pratama",
     hospital: "Lab Prodia Jakarta",
     category: "Lab"
   },
   {
     id: 5,
-    date: "1 November 2024",
-    dateSort: new Date("2024-11-01"),
-    title: "Lipid Profile",
-    status: "Completed",
-    symptoms: "Pemeriksaan kolesterol",
-    treatment: "Total Cholesterol: 195 mg/dL, HDL: 55 mg/dL, LDL: 120 mg/dL, Triglycerides: 100 mg/dL",
+    noRekamMedik: "RM-2024-00056",
+    tanggalMasuk: "1 November 2024",
+    tanggalKeluar: "1 November 2024",
+    diagnosisUtama: "Lipid Profile",
+    icdCode: "Z13.6",
+    diagnosisSekunder: "",
+    keluhan: "Pemeriksaan kolesterol",
+    riwayatAlergi: "Tidak ada",
+    tindakan: "Pengambilan sampel darah puasa",
+    resepObat: "Total Cholesterol: 195 mg/dL, HDL: 55 mg/dL, LDL: 120 mg/dL, Triglycerides: 100 mg/dL",
+    keadaanKeluar: "Selesai",
+    dokterPenanggungJawab: "dr. Andi Pratama",
     hospital: "Lab Prodia Jakarta",
     category: "Lab"
   }
@@ -102,256 +139,280 @@ export function MedicalHistorySection({ patientData }: MedicalHistorySectionProp
   // Filter medical records
   const filteredRecords = medicalRecords.filter(record => {
     const matchesSearch = 
-      record.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      record.symptoms.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      record.hospital.toLowerCase().includes(searchQuery.toLowerCase())
+      record.diagnosisUtama.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      record.keluhan.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      record.hospital.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      record.dokterPenanggungJawab.toLowerCase().includes(searchQuery.toLowerCase())
     
     const matchesCategory = selectedCategory === "All" || record.category === selectedCategory
     
     return matchesSearch && matchesCategory
   })
 
-  // Print medical history as PDF
-  const handlePrintPDF = () => {
+  // Print single record as PDF - matching rekam medis layout
+  const handlePrintSingleRecord = (record: MedicalRecord) => {
     const printWindow = window.open('', '_blank')
     if (!printWindow) return
-
-    const recordsHtml = filteredRecords.map(record => `
-      <div class="record">
-        <div class="record-header">
-          <div>
-            <span class="date">${record.date}</span>
-            <h3 class="title">${record.title}</h3>
-          </div>
-          <span class="category ${record.category.toLowerCase()}">${record.category}</span>
-        </div>
-        <div class="record-body">
-          <div class="field">
-            <label>${record.category === "Diagnose" ? "Symptoms" : "Purpose"}</label>
-            <p>${record.symptoms}</p>
-          </div>
-          <div class="field">
-            <label>${record.category === "Diagnose" ? "Treatment / Prescription" : "Results"}</label>
-            <p>${record.treatment}</p>
-          </div>
-        </div>
-        <div class="record-footer">
-          <span>🏥 ${record.hospital}</span>
-          <span class="status">${record.status}</span>
-        </div>
-      </div>
-    `).join('')
 
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Medical History - ${patientData.name}</title>
+          <title>Rekam Medis - ${patientData.name}</title>
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body { 
               font-family: system-ui, -apple-system, sans-serif;
-              padding: 40px;
+              padding: 24px;
               background: #fff;
               color: #1a1a1a;
+              font-size: 12px;
+            }
+            .container {
+              max-width: 800px;
+              margin: 0 auto;
+              border: 2px solid #333;
             }
             .header {
               display: flex;
               justify-content: space-between;
-              align-items: flex-start;
-              margin-bottom: 32px;
-              padding-bottom: 24px;
-              border-bottom: 2px solid #0077C0;
-            }
-            .logo {
-              display: flex;
               align-items: center;
-              gap: 12px;
-            }
-            .logo-icon {
-              width: 48px;
-              height: 48px;
+              padding: 16px 20px;
+              border-bottom: 2px solid #333;
               background: linear-gradient(135deg, #0077C0, #005a94);
-              border-radius: 12px;
-              display: flex;
-              align-items: center;
-              justify-content: center;
               color: white;
-              font-size: 24px;
             }
-            .logo-text h1 {
-              font-size: 24px;
-              color: #0077C0;
-            }
-            .logo-text p {
-              font-size: 12px;
-              color: #666;
-            }
-            .patient-info {
-              text-align: right;
-            }
-            .patient-info h2 {
-              font-size: 20px;
-              margin-bottom: 4px;
-            }
-            .patient-info p {
-              font-size: 12px;
-              color: #666;
-            }
-            .patient-info .nik {
-              font-family: monospace;
-              background: #f5f5f5;
-              padding: 4px 8px;
-              border-radius: 4px;
-              margin-top: 8px;
-              display: inline-block;
-            }
-            .summary {
-              background: #f8fafc;
-              padding: 16px 24px;
-              border-radius: 8px;
-              margin-bottom: 24px;
-              display: flex;
-              gap: 24px;
-            }
-            .summary-item {
-              text-align: center;
-            }
-            .summary-item .value {
-              font-size: 24px;
+            .logo h1 {
+              font-size: 18px;
               font-weight: bold;
+            }
+            .logo p {
+              font-size: 10px;
+              opacity: 0.8;
+            }
+            .badge {
+              background: #C7EEFF;
               color: #0077C0;
-            }
-            .summary-item .label {
-              font-size: 12px;
-              color: #666;
-            }
-            .records-title {
-              font-size: 16px;
-              margin-bottom: 16px;
-              color: #333;
-            }
-            .record {
-              border: 1px solid #e5e7eb;
-              border-radius: 8px;
-              margin-bottom: 16px;
-              overflow: hidden;
-              page-break-inside: avoid;
-            }
-            .record-header {
-              display: flex;
-              justify-content: space-between;
-              align-items: flex-start;
-              padding: 16px;
-              background: #f8fafc;
-              border-bottom: 1px solid #e5e7eb;
-            }
-            .date {
-              font-size: 12px;
-              color: #666;
-            }
-            .title {
-              font-size: 16px;
-              margin-top: 4px;
-            }
-            .category {
-              font-size: 11px;
               padding: 4px 12px;
-              border-radius: 12px;
+              border-radius: 4px;
+              font-size: 10px;
               font-weight: 600;
             }
-            .category.diagnose {
-              background: #dbeafe;
-              color: #1d4ed8;
+            .title-bar {
+              text-align: center;
+              padding: 12px;
+              border-bottom: 1px solid #333;
+              background: #f5f5f5;
             }
-            .category.lab {
-              background: #d1fae5;
-              color: #059669;
-            }
-            .record-body {
-              padding: 16px;
-            }
-            .field {
-              margin-bottom: 12px;
-            }
-            .field:last-child {
-              margin-bottom: 0;
-            }
-            .field label {
-              font-size: 11px;
-              color: #666;
-              text-transform: uppercase;
-              letter-spacing: 0.5px;
-              display: block;
-              margin-bottom: 4px;
-            }
-            .field p {
+            .title-bar h2 {
               font-size: 14px;
-              line-height: 1.5;
+              font-weight: bold;
             }
-            .record-footer {
+            .content {
+              padding: 0;
+            }
+            .row {
               display: flex;
-              justify-content: space-between;
-              padding: 12px 16px;
-              background: #f8fafc;
-              border-top: 1px solid #e5e7eb;
-              font-size: 12px;
-              color: #666;
+              border-bottom: 1px solid #ddd;
             }
-            .status {
-              color: #059669;
-              font-weight: 500;
+            .row:last-child {
+              border-bottom: none;
+            }
+            .cell {
+              padding: 8px 12px;
+              border-right: 1px solid #ddd;
+              flex: 1;
+            }
+            .cell:last-child {
+              border-right: none;
+            }
+            .cell.label {
+              background: #f9f9f9;
+              font-weight: 600;
+              flex: 0 0 160px;
+              font-size: 11px;
+              color: #555;
+            }
+            .cell.value {
+              flex: 1;
+            }
+            .cell.full {
+              flex: 1 0 100%;
+            }
+            .section-title {
+              background: #e8e8e8;
+              padding: 8px 12px;
+              font-weight: bold;
+              font-size: 12px;
+              border-bottom: 1px solid #ddd;
+            }
+            .patient-info {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+            }
+            .patient-info .cell {
+              padding: 6px 12px;
             }
             .footer {
-              margin-top: 32px;
-              padding-top: 16px;
-              border-top: 1px solid #e5e7eb;
-              text-align: center;
-              font-size: 11px;
-              color: #999;
+              padding: 12px;
+              background: #f5f5f5;
+              border-top: 2px solid #333;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
             }
+            .footer .date {
+              font-size: 10px;
+              color: #666;
+            }
+            .footer .signature {
+              text-align: center;
+            }
+            .footer .signature .line {
+              width: 150px;
+              border-bottom: 1px solid #333;
+              margin-bottom: 4px;
+              height: 40px;
+            }
+            .footer .signature p {
+              font-size: 10px;
+            }
+            .status-badge {
+              display: inline-block;
+              padding: 2px 8px;
+              border-radius: 4px;
+              font-size: 10px;
+              font-weight: 600;
+            }
+            .status-badge.membaik { background: #d1fae5; color: #059669; }
+            .status-badge.sembuh { background: #dbeafe; color: #1d4ed8; }
+            .status-badge.selesai { background: #e0e7ff; color: #4f46e5; }
             @media print {
-              body { padding: 20px; }
-              .record { break-inside: avoid; }
+              body { padding: 0; }
+              .container { border: 1px solid #333; }
             }
           </style>
         </head>
         <body>
-          <div class="header">
-            <div class="logo">
-              <div class="logo-icon">✦</div>
-              <div class="logo-text">
-                <h1>MediChain</h1>
+          <div class="container">
+            <!-- Header -->
+            <div class="header">
+              <div class="logo">
+                <h1>MEDICHAIN</h1>
                 <p>Decentralized Health Record</p>
               </div>
+              <span class="badge">REKAM MEDIS</span>
             </div>
-            <div class="patient-info">
-              <h2>${patientData.name}</h2>
-              <p>Blood Type: ${patientData.bloodType} | Gender: ${patientData.gender} | Age: ${patientData.age}</p>
-              <span class="nik">NIK: ${patientData.nik}</span>
-            </div>
-          </div>
-          
-          <div class="summary">
-            <div class="summary-item">
-              <div class="value">${filteredRecords.length}</div>
-              <div class="label">Total Records</div>
-            </div>
-            <div class="summary-item">
-              <div class="value">${filteredRecords.filter(r => r.category === "Diagnose").length}</div>
-              <div class="label">Diagnoses</div>
-            </div>
-            <div class="summary-item">
-              <div class="value">${filteredRecords.filter(r => r.category === "Lab").length}</div>
-              <div class="label">Lab Results</div>
-            </div>
-          </div>
 
-          <h3 class="records-title">Medical History</h3>
-          ${recordsHtml}
+            <!-- Title -->
+            <div class="title-bar">
+              <h2>FORMULIR REKAM MEDIS</h2>
+            </div>
 
-          <div class="footer">
-            <p>Generated on ${new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })} • MediChain - Decentralized Health Record System</p>
+            <!-- Content -->
+            <div class="content">
+              <!-- Patient Info Section -->
+              <div class="section-title">DATA PASIEN</div>
+              <div class="patient-info">
+                <div class="row">
+                  <div class="cell label">Nama Pasien</div>
+                  <div class="cell value">${patientData.name}</div>
+                </div>
+                <div class="row">
+                  <div class="cell label">NIK</div>
+                  <div class="cell value">${patientData.nik}</div>
+                </div>
+                <div class="row">
+                  <div class="cell label">Jenis Kelamin</div>
+                  <div class="cell value">${patientData.gender}</div>
+                </div>
+                <div class="row">
+                  <div class="cell label">Usia</div>
+                  <div class="cell value">${patientData.age} Tahun</div>
+                </div>
+                <div class="row">
+                  <div class="cell label">Golongan Darah</div>
+                  <div class="cell value">${patientData.bloodType}</div>
+                </div>
+                <div class="row">
+                  <div class="cell label">Riwayat Alergi</div>
+                  <div class="cell value">${record.riwayatAlergi || "-"}</div>
+                </div>
+              </div>
+
+              <!-- Record Info Section -->
+              <div class="section-title">DATA KUNJUNGAN</div>
+              <div class="row">
+                <div class="cell label">No. Rekam Medik</div>
+                <div class="cell value">${record.noRekamMedik}</div>
+              </div>
+              <div class="row">
+                <div class="cell label">Tanggal Masuk</div>
+                <div class="cell value">${record.tanggalMasuk}</div>
+              </div>
+              <div class="row">
+                <div class="cell label">Tanggal Keluar</div>
+                <div class="cell value">${record.tanggalKeluar || "-"}</div>
+              </div>
+              <div class="row">
+                <div class="cell label">Fasilitas Kesehatan</div>
+                <div class="cell value">${record.hospital}</div>
+              </div>
+
+              <!-- Diagnosis Section -->
+              <div class="section-title">DIAGNOSIS</div>
+              <div class="row">
+                <div class="cell label">Diagnosa Utama</div>
+                <div class="cell value">${record.diagnosisUtama}</div>
+              </div>
+              <div class="row">
+                <div class="cell label">Kode ICD-X</div>
+                <div class="cell value">${record.icdCode || "-"}</div>
+              </div>
+              <div class="row">
+                <div class="cell label">Diagnosa Sekunder</div>
+                <div class="cell value">${record.diagnosisSekunder || "-"}</div>
+              </div>
+
+              <!-- Clinical Section -->
+              <div class="section-title">DATA KLINIS</div>
+              <div class="row">
+                <div class="cell label">Keluhan / Gejala</div>
+                <div class="cell value">${record.keluhan}</div>
+              </div>
+              <div class="row">
+                <div class="cell label">Tindakan</div>
+                <div class="cell value">${record.tindakan || "-"}</div>
+              </div>
+              <div class="row">
+                <div class="cell label">Resep / Terapi</div>
+                <div class="cell value">${record.resepObat}</div>
+              </div>
+
+              <!-- Outcome Section -->
+              <div class="section-title">HASIL KUNJUNGAN</div>
+              <div class="row">
+                <div class="cell label">Keadaan Keluar</div>
+                <div class="cell value">
+                  <span class="status-badge ${record.keadaanKeluar.toLowerCase()}">${record.keadaanKeluar}</span>
+                </div>
+              </div>
+              <div class="row">
+                <div class="cell label">Dokter Penanggung Jawab</div>
+                <div class="cell value">${record.dokterPenanggungJawab}</div>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer">
+              <div class="date">
+                Dicetak: ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+              </div>
+              <div class="signature">
+                <div class="line"></div>
+                <p>Tanda Tangan Dokter</p>
+              </div>
+            </div>
           </div>
         </body>
       </html>
@@ -365,7 +426,7 @@ export function MedicalHistorySection({ patientData }: MedicalHistorySectionProp
 
   return (
     <div className="space-y-6">
-      {/* Search, Filter, and Print Section */}
+      {/* Search and Filter Section */}
       <div className="flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row gap-4">
           {/* Search Input */}
@@ -409,24 +470,11 @@ export function MedicalHistorySection({ patientData }: MedicalHistorySectionProp
           </div>
         </div>
 
-        {/* Results Count and Print Button */}
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            Showing <span className="font-semibold text-foreground">{filteredRecords.length}</span> record{filteredRecords.length !== 1 ? 's' : ''}
-            {searchQuery && <span> for &quot;{searchQuery}&quot;</span>}
-          </p>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handlePrintPDF}
-            className="gap-2"
-            disabled={filteredRecords.length === 0}
-          >
-            <Printer className="w-4 h-4" />
-            <span className="hidden sm:inline">Print PDF</span>
-            <span className="sm:hidden">Print</span>
-          </Button>
-        </div>
+        {/* Results Count */}
+        <p className="text-sm text-muted-foreground">
+          Showing <span className="font-semibold text-foreground">{filteredRecords.length}</span> record{filteredRecords.length !== 1 ? 's' : ''}
+          {searchQuery && <span> for &quot;{searchQuery}&quot;</span>}
+        </p>
       </div>
 
       {/* Medical Records Cards Grid */}
@@ -445,41 +493,52 @@ export function MedicalHistorySection({ patientData }: MedicalHistorySectionProp
                 }`} />
                 
                 <div className="p-4 sm:p-5">
-                  {/* Date and Status */}
+                  {/* Date and No RM */}
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <Calendar className="w-3 h-3" />
-                      {record.date}
+                      {record.tanggalMasuk}
                     </div>
-                    <span className="text-xs px-2 py-1 bg-emerald-500/10 text-emerald-600 rounded-full font-medium">
-                      {record.status}
+                    <span className="text-xs font-mono text-muted-foreground">
+                      {record.noRekamMedik}
                     </span>
                   </div>
 
                   {/* Title */}
                   <h4 className="font-bold text-lg text-foreground mb-2 group-hover:text-primary transition-colors">
-                    {record.title}
+                    {record.diagnosisUtama}
                   </h4>
 
-                  {/* Category Badge */}
-                  <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md font-medium mb-3 ${
-                    record.category === "Diagnose" 
-                      ? "bg-blue-500/10 text-blue-600" 
-                      : "bg-emerald-500/10 text-emerald-600"
-                  }`}>
-                    {record.category === "Diagnose" ? <Stethoscope className="w-3 h-3" /> : <FlaskConical className="w-3 h-3" />}
-                    {record.category}
-                  </span>
+                  {/* Category Badge & Status */}
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md font-medium ${
+                      record.category === "Diagnose" 
+                        ? "bg-blue-500/10 text-blue-600" 
+                        : "bg-emerald-500/10 text-emerald-600"
+                    }`}>
+                      {record.category === "Diagnose" ? <Stethoscope className="w-3 h-3" /> : <FlaskConical className="w-3 h-3" />}
+                      {record.category}
+                    </span>
+                    <span className="text-xs px-2 py-1 bg-emerald-500/10 text-emerald-600 rounded-md font-medium">
+                      {record.keadaanKeluar}
+                    </span>
+                  </div>
 
                   {/* Preview */}
                   <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-                    {record.category === "Diagnose" ? record.symptoms : record.treatment}
+                    {record.keluhan}
                   </p>
 
-                  {/* Hospital */}
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground pt-3 border-t border-border">
-                    <Building2 className="w-3 h-3 text-primary" />
-                    <span className="truncate">{record.hospital}</span>
+                  {/* Hospital & Doctor */}
+                  <div className="space-y-1 pt-3 border-t border-border">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Building2 className="w-3 h-3 text-primary" />
+                      <span className="truncate">{record.hospital}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <User className="w-3 h-3 text-primary" />
+                      <span className="truncate">{record.dokterPenanggungJawab}</span>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -524,12 +583,14 @@ export function MedicalHistorySection({ patientData }: MedicalHistorySectionProp
               }`}>
                 <div className="flex items-start justify-between">
                   <div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                      <Calendar className="w-4 h-4" />
-                      {selectedRecord.date}
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                      <span className="font-mono">{selectedRecord.noRekamMedik}</span>
+                      <span>•</span>
+                      <span>{selectedRecord.tanggalMasuk}</span>
                     </div>
-                    <h2 className="text-2xl font-bold text-foreground">{selectedRecord.title}</h2>
-                    <div className="flex items-center gap-2 mt-2">
+                    <h2 className="text-2xl font-bold text-foreground">{selectedRecord.diagnosisUtama}</h2>
+                    <p className="text-sm text-muted-foreground mt-1">ICD: {selectedRecord.icdCode || "-"}</p>
+                    <div className="flex items-center gap-2 mt-3">
                       <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md font-medium ${
                         selectedRecord.category === "Diagnose" 
                           ? "bg-blue-500/20 text-blue-600" 
@@ -539,7 +600,7 @@ export function MedicalHistorySection({ patientData }: MedicalHistorySectionProp
                         {selectedRecord.category}
                       </span>
                       <span className="text-xs px-2 py-1 bg-emerald-500/20 text-emerald-600 rounded-md font-medium">
-                        {selectedRecord.status}
+                        {selectedRecord.keadaanKeluar}
                       </span>
                     </div>
                   </div>
@@ -550,25 +611,73 @@ export function MedicalHistorySection({ patientData }: MedicalHistorySectionProp
               </div>
 
               {/* Modal Body */}
-              <div className="p-6 space-y-6">
+              <div className="p-6 space-y-5">
+                {/* Keluhan */}
                 <div>
-                  <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-                    {selectedRecord.category === "Diagnose" ? "Symptoms" : "Purpose"}
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                    Keluhan / Gejala
                   </h4>
-                  <p className="text-foreground">{selectedRecord.symptoms}</p>
+                  <p className="text-foreground">{selectedRecord.keluhan}</p>
                 </div>
 
+                {/* Riwayat Alergi */}
+                {selectedRecord.riwayatAlergi && (
+                  <div>
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                      Riwayat Alergi
+                    </h4>
+                    <p className="text-foreground">{selectedRecord.riwayatAlergi}</p>
+                  </div>
+                )}
+
+                {/* Tindakan */}
+                {selectedRecord.tindakan && (
+                  <div>
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                      Tindakan
+                    </h4>
+                    <p className="text-foreground">{selectedRecord.tindakan}</p>
+                  </div>
+                )}
+
+                {/* Resep */}
                 <div>
-                  <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-                    {selectedRecord.category === "Diagnose" ? "Treatment / Prescription" : "Results"}
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                    {selectedRecord.category === "Diagnose" ? "Resep / Terapi" : "Hasil Pemeriksaan"}
                   </h4>
-                  <p className="text-foreground">{selectedRecord.treatment}</p>
+                  <p className="text-foreground">{selectedRecord.resepObat}</p>
                 </div>
 
-                <div className="pt-4 border-t border-border flex items-center gap-2 text-sm text-muted-foreground">
-                  <Building2 className="w-4 h-4 text-primary" />
-                  {selectedRecord.hospital}
+                {/* Diagnosa Sekunder */}
+                {selectedRecord.diagnosisSekunder && (
+                  <div>
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                      Diagnosa Sekunder
+                    </h4>
+                    <p className="text-foreground">{selectedRecord.diagnosisSekunder}</p>
+                  </div>
+                )}
+
+                {/* Footer Info */}
+                <div className="pt-4 border-t border-border space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Building2 className="w-4 h-4 text-primary" />
+                    {selectedRecord.hospital}
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <User className="w-4 h-4 text-primary" />
+                    {selectedRecord.dokterPenanggungJawab}
+                  </div>
                 </div>
+
+                {/* Print Button */}
+                <Button
+                  onClick={() => handlePrintSingleRecord(selectedRecord)}
+                  className="w-full gap-2 mt-4"
+                >
+                  <Printer className="w-4 h-4" />
+                  Cetak Rekam Medis
+                </Button>
               </div>
             </CardContent>
           </Card>
