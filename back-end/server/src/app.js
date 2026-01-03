@@ -3,16 +3,14 @@ const express = require('express');
 const swaggerUi = require('swagger-ui-express');
 const YAML = require('yamljs');
 const routes = require('./routes');
+const hospitalVerifierRoutes = require('./routes/hospitalVerifierRoutes'); // Tambahkan baris ini
 
 const app = express();
 app.use(express.json());
 
-// Swagger setup
-const swaggerDocument = YAML.load('./swagger.yaml');
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-
 // API routes
 app.use('/api', routes);
+app.use('/api', hospitalVerifierRoutes); // Tambahkan baris ini
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
