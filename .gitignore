@@ -31,3 +31,4 @@ coverage/
 # Ignore local .git in subfolders
 back-end/smart-contract/.git/
 frontend1/medichain-hackathon
+frontend1/medichain-hackathon
