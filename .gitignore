@@ -14,7 +14,8 @@ docs/
 !/broadcast
 /broadcast/*/31337/
 /broadcast/**/dry-run/
-
+/frontend1/
+/frontend2/
 # Ignore OS/Editor files
 .DS_Store
 Thumbs.db
