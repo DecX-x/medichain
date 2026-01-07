@@ -20,6 +20,7 @@
     "@radix-ui/react-switch": "^1.2.6",
     "@tanstack/react-form": "^1.27.7",
     "@tanstack/zod-form-adapter": "^0.42.1",
+    "@web3icons/react": "^4.1.12",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.26",

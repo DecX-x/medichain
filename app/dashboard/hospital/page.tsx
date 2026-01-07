@@ -1217,7 +1217,7 @@ function OCRUploadSection({
           </p>
           <div className="flex items-center gap-2 mt-4 text-xs text-teal-600">
             <Sparkles className="w-3 h-3" />
-            <span>Powered by Gemini AI</span>
+            <span>Powered by AI</span>
           </div>
         </div>
       ) : (

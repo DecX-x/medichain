@@ -41,6 +41,9 @@ importers:
       '@tanstack/zod-form-adapter':
         specifier: ^0.42.1
         version: 0.42.1(zod@3.25.76)
+      '@web3icons/react':
+        specifier: ^4.1.12
+        version: 4.1.12(react@19.2.1)(typescript@5.9.3)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -2294,6 +2297,16 @@ packages:
 
   '@walletconnect/window-metadata@1.0.1':
     resolution: {integrity: sha512-9koTqyGrM2cqFRW517BPY/iEtUDx2r1+Pwwu5m7sJ7ka79wi3EyqhqcICk/yDmv6jAS1rjKgTKXlEhanYjijcA==}
+
+  '@web3icons/common@0.11.41':
+    resolution: {integrity: sha512-xsFldLiEE+2HEScvy7D3PAG65ZKmEVo4twfdfisjcn+8TdEG1wPKDDtsfN9kEaS4OkJMYC0QlXrx5ssbebI0ww==}
+    peerDependencies:
+      typescript: ^5.0.0
+
+  '@web3icons/react@4.1.12':
+    resolution: {integrity: sha512-pKFv+5RV34hTPa+5EYQQY3+vhKmOh3xzaNJYoifVQW59FUcvlAzReI2f9tiVVAgkhQEOGPbfNY/FTsZRzCuiYg==}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0
 
   '@webgpu/types@0.1.68':
     resolution: {integrity: sha512-3ab1B59Ojb6RwjOspYLsTpCzbNB3ZaamIAxBMmvnNkiDoLTZUOBXZ9p5nAYVEkQlDdf6qAZWi1pqj9+ypiqznA==}
@@ -8653,6 +8666,17 @@ snapshots:
     dependencies:
       '@walletconnect/window-getters': 1.0.1
       tslib: 1.14.1
+
+  '@web3icons/common@0.11.41(typescript@5.9.3)':
+    dependencies:
+      typescript: 5.9.3
+
+  '@web3icons/react@4.1.12(react@19.2.1)(typescript@5.9.3)':
+    dependencies:
+      '@web3icons/common': 0.11.41(typescript@5.9.3)
+      react: 19.2.1
+    transitivePeerDependencies:
+      - typescript
 
   '@webgpu/types@0.1.68': {}
 

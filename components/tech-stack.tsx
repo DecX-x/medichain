@@ -2,14 +2,19 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { SiNextdotjs, SiIpfs, SiThirdweb } from "react-icons/si"
-import { RiNftFill } from "react-icons/ri"
+import { SiNextdotjs, SiThirdweb } from "react-icons/si"
 import { GiPinata } from "react-icons/gi"
+import { NetworkLisk } from "@web3icons/react"
+
+// Custom wrapper for NetworkLisk to match the icon interface
+const LiskIcon = ({ className }: { className?: string }) => (
+  <NetworkLisk variant="branded" size={32} className={className} />
+)
 
 const techStacks = [
   { name: "Next.js", description: "High-performance React framework for scalable web applications", icon: SiNextdotjs },
   { name: "Thirdweb", description: "Web3 SDK for Wallets & Smart Contracts", icon: SiThirdweb },
-  { name: "Lisk Sepolia", description: "Layer 2 network for scalable transactions", icon: RiNftFill },
+  { name: "Lisk Sepolia", description: "Layer 2 network for scalable transactions", icon: LiskIcon, isCustom: true },
   { name: "Pinata IPFS", description: "Secure decentralized storage ensuring immutable data availability", icon: GiPinata },
 ]
 
