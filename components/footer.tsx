@@ -2,7 +2,7 @@
 "use client"
 
 import Link from "next/link"
-import { Github, Linkedin, Twitter, Heart, Shield, ExternalLink } from "lucide-react"
+import { Github as GithubIcon, Linkedin as LinkedinIcon, Twitter as TwitterIcon, Heart, Shield, ExternalLink } from "lucide-react"
 import { NetworkLisk } from "@web3icons/react"
 
 interface FooterProps {
@@ -10,9 +10,9 @@ interface FooterProps {
 }
 
 const socialLinks = [
-  { icon: Twitter, href: "https://twitter.com", label: "Twitter" },
-  { icon: Linkedin, href: "https://linkedin.com", label: "LinkedIn" },
-  { icon: Github, href: "https://github.com", label: "GitHub" },
+  { icon: TwitterIcon, href: "https://twitter.com", label: "Twitter" },
+  { icon: LinkedinIcon, href: "https://linkedin.com", label: "LinkedIn" },
+  { icon: GithubIcon, href: "https://github.com", label: "GitHub" },
 ]
 
 const footerLinks = {
@@ -154,19 +154,13 @@ export function Footer({ activeTab = "patient" }: FooterProps) {
       </div>
 
       {/* Fluid Background Text */}
-      <div className="relative overflow-hidden py-4 bg-gradient-to-t from-secondary/30 to-transparent">
+      <div className="relative overflow-hidden py-6 bg-gradient-to-t from-secondary/30 to-transparent">
         <div className="flex justify-center">
           <span 
-            className="text-[6rem] md:text-[10rem] lg:text-[14rem] font-black tracking-tighter select-none"
-            style={{
-              background: isHospital 
-                ? "linear-gradient(to right, #0d9488, #14b8a6)" 
-                : "linear-gradient(to right, var(--primary), #0077C0)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-              opacity: 0.06,
-            }}
+            className={`text-[6rem] md:text-[10rem] lg:text-[14rem] font-black tracking-tighter select-none ${
+              isHospital ? "text-teal-500" : "text-primary"
+            }`}
+            style={{ opacity: 0.08 }}
           >
             MEDICHAIN
           </span>
