@@ -19,7 +19,9 @@ import {
   FileText,
   AlertCircle,
   Send,
-  Printer
+  Printer,
+  RefreshCw,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -1131,7 +1133,7 @@ function InputRecordStep({
 }
 
 // OCR Upload Section Component
-import { Upload, Loader2, FileCheck, Sparkles, AlertTriangle } from "lucide-react";
+import { Upload, FileCheck, Sparkles, AlertTriangle } from "lucide-react";
 
 function OCRUploadSection({
   onOCRComplete,
@@ -1342,6 +1344,7 @@ function QRScannerModal({
   const [accessStatus, setAccessStatus] = useState<"none" | "checking" | "has_access" | "requesting" | "requested">("none");
   const [requestMessage, setRequestMessage] = useState("");
   const [manualAddress, setManualAddress] = useState("");
+  const [isCheckingApproval, setIsCheckingApproval] = useState(false);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -1603,6 +1606,27 @@ function QRScannerModal({
     }
   };
 
+  const handleCheckAccessStatus = async () => {
+    if (!account || !scannedPatient) return;
+    
+    setIsCheckingApproval(true);
+    setError(null);
+    
+    try {
+      const accessResult = await checkAccess(scannedPatient.walletAddress, account.address);
+      if (accessResult.hasAccess) {
+        setAccessStatus("has_access");
+      } else {
+        setError("Access not yet approved. Please wait for patient approval.");
+      }
+    } catch (err) {
+      console.error("Error checking access:", err);
+      setError("Failed to check access status. Please try again.");
+    } finally {
+      setIsCheckingApproval(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
@@ -1781,9 +1805,28 @@ function QRScannerModal({
             <p className="text-sm text-muted-foreground mb-6">
               The patient will receive a notification in their app. Once approved, you can proceed with adding medical records.
             </p>
-            <Button variant="outline" className="w-full" onClick={onClose}>
-              Close
-            </Button>
+            <div className="space-y-3">
+              <Button 
+                className="w-full gap-2 bg-gradient-to-r from-teal-600 to-teal-500 hover:from-teal-700 hover:to-teal-600"
+                onClick={handleCheckAccessStatus}
+                disabled={isCheckingApproval}
+              >
+                {isCheckingApproval ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Checking...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="w-4 h-4" />
+                    Check if Approved
+                  </>
+                )}
+              </Button>
+              <Button variant="outline" className="w-full" onClick={onClose}>
+                Close
+              </Button>
+            </div>
           </div>
         )}
 
