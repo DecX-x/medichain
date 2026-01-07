@@ -40,3 +40,24 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+
+# Remix compiler artifacts
+**/artifacts/
+**/artifacts/**
+
+# Remix plugin state folders
+deps/
+states/
+
+# Debug info
+*.dbg.json
+*.tsbuildinfo
+
+# Optional
+.env
+.env.local
+smart-contract/.github
+smart-contract/broadcast
+smart-contract/cache
+smart-contract/lib
+smart-contract/out
