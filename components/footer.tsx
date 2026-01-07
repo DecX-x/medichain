@@ -157,7 +157,16 @@ export function Footer({ activeTab = "patient" }: FooterProps) {
       <div className="relative overflow-hidden py-4 bg-gradient-to-t from-secondary/30 to-transparent">
         <div className="flex justify-center">
           <span 
-            className={`text-[6rem] md:text-[10rem] lg:text-[14rem] font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r ${gradientClass} opacity-[0.06] select-none`}
+            className="text-[6rem] md:text-[10rem] lg:text-[14rem] font-black tracking-tighter select-none"
+            style={{
+              background: isHospital 
+                ? "linear-gradient(to right, #0d9488, #14b8a6)" 
+                : "linear-gradient(to right, var(--primary), #0077C0)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              opacity: 0.06,
+            }}
           >
             MEDICHAIN
           </span>
