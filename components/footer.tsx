@@ -154,16 +154,18 @@ export function Footer({ activeTab = "patient" }: FooterProps) {
       </div>
 
       {/* Fluid Background Text */}
-      <div className="relative overflow-hidden py-6 bg-gradient-to-t from-secondary/30 to-transparent">
-        <div className="flex justify-center">
-          <span 
-            className={`text-[6rem] md:text-[10rem] lg:text-[14rem] font-black tracking-tighter select-none ${
-              isHospital ? "text-teal-500" : "text-primary"
-            }`}
-            style={{ opacity: 0.08 }}
-          >
-            MEDICHAIN
-          </span>
+      <div className="relative overflow-hidden py-4 md:py-6 bg-gradient-to-t from-secondary/30 to-transparent">
+        <div className="w-full overflow-hidden">
+          <div className="flex justify-center whitespace-nowrap">
+            <span 
+              className={`text-[4rem] sm:text-[5rem] md:text-[8rem] lg:text-[12rem] xl:text-[14rem] font-black tracking-tighter select-none leading-none ${
+                isHospital ? "text-teal-500" : "text-primary"
+              }`}
+              style={{ opacity: 0.08 }}
+            >
+              MEDICHAIN
+            </span>
+          </div>
         </div>
       </div>
     </footer>
