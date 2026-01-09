@@ -338,7 +338,7 @@ export function MedicalHistorySection({ patientData }: MedicalHistorySectionProp
                   <div class="cell value">${patientData.name}</div>
                 </div>
                 <div class="row">
-                  <div class="cell label">ID Number</div>
+                  <div class="cell label">Government ID</div>
                   <div class="cell value">${patientData.nik}</div>
                 </div>
                 <div class="row">
